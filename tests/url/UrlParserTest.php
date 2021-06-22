@@ -62,8 +62,8 @@ abstract class UrlParserTest extends TestCase
 
         $result = $this->parseUrl($url);
 
-        self::assertEquals('http', $result['scheme']);
-        self::assertEquals('www.somehost.com', $result['host']);
+        self::assertEquals('http', $result->getScheme());
+        self::assertEquals('www.somehost.com', $result->getHost());
 
         // the '?' which is four characters from the end is interpreted as the delimiter for a querystring.  In order to use these characters
         // without risking that the parsing be messed up, they should all be url encoded
@@ -71,7 +71,7 @@ abstract class UrlParserTest extends TestCase
 
         $url = 'http://www.somehost.com/' . urlencode(implode($reservedChars));
         $result = $this->parseUrl($url);
-        self::assertEquals('/' . urlencode(implode($reservedChars)), $result['path']);
+        self::assertEquals('/' . urlencode(implode($reservedChars)), $result->getPath());
     }
 
     /**
