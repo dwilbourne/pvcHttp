@@ -3,9 +3,8 @@
 namespace pvc\url;
 
 use pvc\msg\MsgRetrievalInterface;
-use pvc\Parser\ParserInterface;
 
-class Url implements ParserInterface
+class Url
 {
     protected string $scheme;    // protocol e.g. http, https, ftp, etc.
     protected string $host;
@@ -16,7 +15,6 @@ class Url implements ParserInterface
     protected array $query = [];
     protected string $fragment;
 
-    protected ParserInterface $urlParser;
     protected ? MsgRetrievalInterface $errmsg;
 
     protected int $httpStatusCode;
@@ -89,11 +87,6 @@ class Url implements ParserInterface
         511 => 'Network Authentication Required',
         599 => 'Network Connect Timeout Error'
     );
-
-    public function __construct(ParserInterface $urlParser) {
-        $this->setUrlParser($urlParser);
-    }
-
 
     public function setScheme(string $scheme)
     {
@@ -175,22 +168,6 @@ class Url implements ParserInterface
         return $this->fragment;
     }
 
-    /**
-     * @return ParserInterface
-     */
-    public function getUrlParser(): ParserInterface
-    {
-        return $this->urlParser;
-    }
-
-    /**
-     * @param ParserInterface $urlParser
-     */
-    public function setUrlParser(ParserInterface $urlParser): void
-    {
-        $this->urlParser = $urlParser;
-    }
-
     public function getHttpStatusCode(): ?int
     {
         return $this->httpStatusCode;
@@ -239,26 +216,9 @@ class Url implements ParserInterface
         }
     }
 
-    public function parse(string $urlString): bool
-    {
-        // for safety's sake let's trim the whitespace off the url, in reference to the quirk cited
-        // in the user contributed notes of parse_url
-        if (!$this->urlParser->parse(trim($urlString))) {
-            $this->errmsg = $this->urlParser->getErrmsg();
-            return false;
-        }
-        $this->setURLAttributes($this->urlParser->getParsedValue());
-        return true;
-    }
-
     public function getErrmsg(): ?MsgRetrievalInterface
     {
         return $this->errmsg;
-    }
-
-    public function getParsedValue()
-    {
-        return $this;
     }
 
     public function generateURLString(): string

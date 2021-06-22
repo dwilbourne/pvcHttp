@@ -40,10 +40,10 @@ abstract class UrlParserTest extends TestCase
         $url = 'http://username:password@hostname:9090/path?arg=value#anchor';
         $expectedResult = array(
             'scheme' => 'http',
-            'username' => 'username',
-            'password' => 'password',
-            'hostname' => 'hostname',
+            'host' => 'hostname',
             'port' => '9090',
+            'user' => 'username',
+            'pass' => 'password',
             'path' => '/path',
             'query' => 'arg=value',
             'fragment' => 'anchor'
