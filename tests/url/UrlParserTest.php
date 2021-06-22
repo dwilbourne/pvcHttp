@@ -67,7 +67,7 @@ abstract class UrlParserTest extends TestCase
 
         // the '?' which is four characters from the end is interpreted as the delimiter for a querystring.  In order to use these characters
         // without risking that the parsing be messed up, they should all be url encoded
-        self::assertNotEquals('/' . implode($reservedChars), $result['path']);
+        self::assertNotEquals('/' . implode($reservedChars), $result->getPath());
 
         $url = 'http://www.somehost.com/' . urlencode(implode($reservedChars));
         $result = $this->parseUrl($url);
