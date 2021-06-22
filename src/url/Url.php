@@ -183,8 +183,7 @@ class Url
         return $this->curlErrorMessage;
     }
 
-
-    private function setURLAttributes(array $urlParts) : void
+    public function setAttributesFromArray(array $urlParts) : void
     {
         foreach ($urlParts as $partName => $part) {
             switch ($partName) {
