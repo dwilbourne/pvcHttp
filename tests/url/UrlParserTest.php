@@ -38,8 +38,8 @@ abstract class UrlParserTest extends TestCase
     }
 
     public function testParseUrlStringBasic() {
-        $url = 'http://username:password@hostname:9090/path?arg=value#anchor';
-        $expectedResult = array(
+        $urlString = 'http://username:password@hostname:9090/path?arg=value#anchor';
+        $values = array(
             'scheme' => 'http',
             'host' => 'hostname',
             'port' => '9090',
@@ -49,8 +49,9 @@ abstract class UrlParserTest extends TestCase
             'query' => 'arg=value',
             'fragment' => 'anchor'
         );
-        $result = $this->parseUrl($url);
-        self::assertEqualsCanonicalizing($expectedResult, $result);
+        $expectedResult = new Url($values);
+        $result = $this->parseUrl($urlString);
+        self::assertTrue($expectedResult == $result);
     }
 
     public function testParseUrlStringReservedChars() {

@@ -88,6 +88,13 @@ class Url
         599 => 'Network Connect Timeout Error'
     );
 
+    public function __construct(array $values = null)
+    {
+        if ($values) {
+            $this->setAttributesFromArray($values);
+        }
+    }
+
     public function setScheme(string $scheme)
     {
         $this->scheme = $scheme;
