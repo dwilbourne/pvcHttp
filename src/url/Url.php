@@ -102,7 +102,7 @@ class Url
 
     public function getScheme(): ?string
     {
-        return $this->scheme;
+        return $this->scheme ?? null;
     }
 
     public function setHost(string $host)
@@ -112,7 +112,7 @@ class Url
 
     public function getHost(): ?string
     {
-        return $this->host;
+        return $this->host ?? null;
     }
 
     public function setPort(int $port)
@@ -122,7 +122,7 @@ class Url
 
     public function getPort(): ?int
     {
-        return $this->port;
+        return $this->port ?? null;
     }
 
     public function setUser(string $user)
@@ -132,7 +132,7 @@ class Url
 
     public function getUser(): ?string
     {
-        return $this->user;
+        return $this->user :: null;
     }
 
     public function setPassword(string $pwd)
@@ -142,7 +142,7 @@ class Url
 
     public function getPassword(): ?string
     {
-        return $this->password;
+        return $this->password ?? null;
     }
 
     public function setPath(string $path)
@@ -150,9 +150,19 @@ class Url
         $this->path = explode('/', $path);
     }
 
-    public function getPath(): array
+    public function getPath() :? string
+    {
+        return $this->getPathAsString();
+    }
+
+    public function getPathAsArray(): array
     {
         return $this->path;
+    }
+
+    public function getPathAsString(): ?string
+    {
+        return empty($this->path) ? null : implode('/', $this->path);
     }
 
     public function setQuery($query)
@@ -172,7 +182,7 @@ class Url
 
     public function getFragment(): ?string
     {
-        return $this->fragment;
+        return $this->fragment ?? null;
     }
 
     public function getHttpStatusCode(): ?int
