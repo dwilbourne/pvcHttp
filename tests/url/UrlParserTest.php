@@ -9,6 +9,7 @@ namespace tests\url;
 
 use PHPUnit\Framework\TestCase;
 use pvc\parser\ParserInterface;
+use pvc\url\Url;
 
 
 /**
@@ -30,7 +31,7 @@ abstract class UrlParserTest extends TestCase
         $this->urlParser = $urlParser;
     }
 
-    private function parseUrl(string $url) : array
+    private function parseUrl(string $url) : Url
     {
         self::assertTrue($this->urlParser->parse($url));
         return $this->urlParser->getParsedValue();
