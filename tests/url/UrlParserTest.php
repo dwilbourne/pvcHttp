@@ -49,7 +49,7 @@ abstract class UrlParserTest extends TestCase
             'fragment' => 'anchor'
         );
         $result = $this->parseUrl($url);
-        self::assertEquals($expectedResult, $result);
+        self::assertEqualsCanonicalizing($expectedResult, $result);
     }
 
     public function testParseUrlStringReservedChars() {
