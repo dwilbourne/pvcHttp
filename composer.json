@@ -23,7 +23,7 @@
 		"mockery/mockery": "dev-master"
 	},
 	"require": {
-		"pvc/interfaces": "dev-master",
+		"pvc/interfaces": "@dev",
 		"ext-curl": "*",
 		"ext-mbstring": "*"
 	}
