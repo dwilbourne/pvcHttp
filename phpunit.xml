@@ -1,0 +1,22 @@
+<phpunit colors="true" bootstrap="vendor/autoload.php">
+
+    <logging>
+        <log type="coverage-html" target="coverage"/>
+    </logging>
+
+    <filter>
+        <whitelist>
+            <directory>src/url*</directory>
+        </whitelist>
+    </filter>
+
+
+    <testsuites>
+
+        <testsuite name="src_tests">
+            <directory>tests/url*</directory>
+        </testsuite>
+
+    </testsuites>
+
+</phpunit>

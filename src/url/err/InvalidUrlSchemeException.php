@@ -23,6 +23,7 @@ class InvalidUrlSchemeException extends Exception
         $msgText = 'Invalid Url scheme in url.  Scheme = %s';
         $msg = new ErrorExceptionMsg($vars, $msgText);
         $code = ec::INVALID_URL_SCHEME_EXCEPTION;
+        $previous = null;
         parent::__construct($msg, $code, $previous);
     }
 }

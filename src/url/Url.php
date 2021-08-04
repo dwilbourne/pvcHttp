@@ -3,16 +3,17 @@
 namespace pvc\url;
 
 use pvc\msg\MsgRetrievalInterface;
+use pvc\url\err\CurlInitException;
 
 class Url
 {
     protected string $scheme;    // protocol e.g. http, https, ftp, etc.
     protected string $host;
-    protected string $port;
+    protected int $port;
     protected string $user;
     protected string $password;
-    protected array $path = [];
-    protected array $query = [];
+    protected string $path;
+    protected string $query;
     protected string $fragment;
 
     protected ? MsgRetrievalInterface $errmsg;
@@ -132,7 +133,7 @@ class Url
 
     public function getUser(): ?string
     {
-        return $this->user :: null;
+        return $this->user ?? null;
     }
 
     public function setPassword(string $pwd)
@@ -145,32 +146,29 @@ class Url
         return $this->password ?? null;
     }
 
+    // if setting it manually, remember that $path should not have the leading '/'.  parse_url removes it
+    // by default
     public function setPath(string $path)
     {
-        $this->path = explode('/', $path);
+        $this->path = $path;
     }
 
     public function getPath() :? string
     {
-        return $this->getPathAsString();
+        return $this->path;
     }
 
     public function getPathAsArray(): array
     {
-        return $this->path;
+        return explode('/', $this->getPath());
     }
 
-    public function getPathAsString(): ?string
+    public function setQuery(string $queryString)
     {
-        return empty($this->path) ? null : implode('/', $this->path);
+        $this->query = $queryString;
     }
 
-    public function setQuery($query)
-    {
-        parse_str($query, $this->query);
-    }
-
-    public function getQuery(): array
+    public function getQuery(): string
     {
         return $this->query;
     }
@@ -200,6 +198,11 @@ class Url
         return $this->curlErrorMessage;
     }
 
+    /**
+     * setAttributesFromArray
+     * @param array $urlParts
+     * the indices for the array should be the same ones produced by the php verb parse_url
+     */
     public function setAttributesFromArray(array $urlParts) : void
     {
         foreach ($urlParts as $partName => $part) {
@@ -237,28 +240,50 @@ class Url
         return $this->errmsg;
     }
 
+    /**
+     * generateURLString
+     * @return string
+     *
+     * urlencode / urldecode translate the percent-encoded bits as well as plus signs.  rawurlencode
+     * and rawurldecode do not translate plus signs, and are designed to be compliant with RFC 3986, which specifies
+     * the syntaxes for URI's, URN's and URL's.
+     */
     public function generateURLString(): string
     {
         $scheme = !empty($this->scheme) ? $this->scheme . '://' : '';
         $host = !empty($this->host) ? $this->host : '';
         $port = !empty($this->port) ? ':' . $this->port : '';
         $user = !empty($this->user) ? $this->user : '';
-        $pass = !empty($this->pass) ? ':' . $this->pass : '';
+        $pass = !empty($this->password) ? ':' . $this->password : '';
         $pass = ($user || $pass) ? "$pass@" : '';
-        $path = !empty($this->path) ? "/" . implode("/", $this->path) : '';
-        $query = !empty($this->query) ? '?' . implode("&", $this->query) : '';
+        $path = !empty($this->path) ? "/" . $this->path : '';
+        $query = !empty($this->query) ? '?' . $this->query : '';
         $fragment = !empty($this->fragment) ? '#' . $this->fragment : '';
-        return urlencode("$scheme$user$pass$host$port$path$query$fragment");
+        return "$scheme$user$pass$host$port$path$query$fragment";
     }
 
     public function exists(): bool
     {
-        $ch = @curl_init($this->generateURLString());
+       $ch = curl_init($this->generateURLString());
+        if ($ch === false) {
+            throw new CurlInitException();
+        }
+
+        /*
+         * these will never fail/error as long as $ch is valid but go ahead and put in error suppression
+         */
         @curl_setopt($ch, CURLOPT_HEADER, true);
         @curl_setopt($ch, CURLOPT_NOBODY, true);
         @curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
 
-        @curl_exec($ch);
+        /*
+         * curl_exec returns true on success, false on failure, or some sort of string if CURLOPT_RETURNTRANSFER
+         * is set (which it is not).
+         */
+        if (false === curl_exec($ch)) {
+            return false;
+        }
+
         $this->httpStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $this->httpStatus = $this->httpStatusCodes[$this->httpStatusCode];
         $this->curlErrorMessage = curl_error($ch);
