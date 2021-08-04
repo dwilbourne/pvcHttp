@@ -8,7 +8,8 @@ namespace pvc\url;
 
 /**
  * encapsulate the idea of a querystring.  parse_str mangles parameter names so they conform to the php variable
- * naming convention, but a different parser might not and this encapsulation can provide for that.
+ * naming convention, but a different parser might not and this encapsulation can provide for that. Feed the params
+ * attribute to http_build_query to get an encoded querystring.
  */
 class QueryString
 {
