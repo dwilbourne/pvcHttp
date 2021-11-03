@@ -24,7 +24,7 @@
 		"mockery/mockery": "dev-master"
 	},
 	"require": {
-		"pvc/interfaces": "^v0.1.7-alpha",
+		"pvc/interfaces": "dev-master",
 		"pvc/err": "dev-master",
 		"pvc/msg": "dev-master",
 		"pvc/parser": "dev-master",
