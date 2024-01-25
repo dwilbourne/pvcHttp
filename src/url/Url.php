@@ -1,27 +1,80 @@
 <?php
 
-namespace pvc\url;
+/**
+ * @author Doug Wilbourne (dougwilbourne@gmail.com)
+ */
 
-use pvc\msg\MsgRetrievalInterface;
-use pvc\url\err\CurlInitException;
+namespace pvc\http\url;
 
+use pvc\http\err\CurlInitException;
+use pvc\http\err\InvalidPortNumberException;
+
+/**
+ * Class Url
+ */
 class Url
 {
+    /**
+     * @var string
+     */
     protected string $scheme;    // protocol e.g. http, https, ftp, etc.
+
+    /**
+     * @var string
+     */
     protected string $host;
+
+    /**
+     * @var int
+     */
     protected int $port;
+
+    /**
+     * @var string
+     */
     protected string $user;
+
+    /**
+     * @var string
+     */
     protected string $password;
+
+    /**
+     * @var string
+     */
     protected string $path;
+
+    /**
+     * @var string
+     *
+     *  it is tempting to type this as \pvc\http\utl\QueryString, but because this class is really designed to be
+     *  hydrated by the parse_url verb, it is typed as a string for the moment
+     */
     protected string $query;
+
+    /**
+     * @var string
+     */
     protected string $fragment;
 
-    protected ? MsgRetrievalInterface $errmsg;
+    /**
+     * @var int|null
+     */
+    protected int|null $httpStatusCode;
 
-    protected int $httpStatusCode;
+    /**
+     * @var string
+     */
     protected string $httpStatus;
+
+    /**
+     * @var string
+     */
     protected string $curlErrorMessage;
 
+    /**
+     * @var array<int, string>
+     */
     private $httpStatusCodes = array(
         100 => 'Continue',
         101 => 'Switching Protocols',
@@ -89,6 +142,9 @@ class Url
         599 => 'Network Connect Timeout Error'
     );
 
+    /**
+     * @param array<string, string>|null $values
+     */
     public function __construct(array $values = null)
     {
         if ($values) {
@@ -96,111 +152,195 @@ class Url
         }
     }
 
-    public function setScheme(string $scheme)
+    /**
+     * setScheme
+     * @param string $scheme
+     */
+    public function setScheme(string $scheme): void
     {
         $this->scheme = $scheme;
     }
 
+    /**
+     * getScheme
+     * @return string|null
+     */
     public function getScheme(): ?string
     {
         return $this->scheme ?? null;
     }
 
-    public function setHost(string $host)
+    /**
+     * setHost
+     * @param string $host
+     */
+    public function setHost(string $host): void
     {
         $this->host = $host;
     }
 
+    /**
+     * getHost
+     * @return string|null
+     */
     public function getHost(): ?string
     {
         return $this->host ?? null;
     }
 
-    public function setPort(int $port)
+    /**
+     * setPort
+     * @param int|string $port
+     * @throws InvalidPortNumberException
+     */
+    public function setPort(int|string $port): void
     {
-        $this->port = $port;
+        if (!ctype_digit($port)) {
+            throw new InvalidPortNumberException();
+        }
+        $this->port = (int)$port;
     }
 
+    /**
+     * getPort
+     * @return int|null
+     */
     public function getPort(): ?int
     {
         return $this->port ?? null;
     }
 
-    public function setUser(string $user)
+    /**
+     * setUser
+     * @param string $user
+     */
+    public function setUser(string $user): void
     {
         $this->user = $user;
     }
 
+    /**
+     * getUser
+     * @return string|null
+     */
     public function getUser(): ?string
     {
         return $this->user ?? null;
     }
 
-    public function setPassword(string $pwd)
+    /**
+     * setPassword
+     * @param string $pwd
+     */
+    public function setPassword(string $pwd): void
     {
         $this->password = $pwd;
     }
 
+    /**
+     * getPassword
+     * @return string|null
+     */
     public function getPassword(): ?string
     {
         return $this->password ?? null;
     }
 
-    // if setting it manually, remember that $path should not have the leading '/'.  parse_url removes it
-    // by default
-    public function setPath(string $path)
+    /**
+     * setPath
+     * @param string $path
+     *
+     * if setting it manually, remember that $path should not have the leading '/'.  parse_url removes it by default
+     */
+    public function setPath(string $path): void
     {
         $this->path = $path;
     }
 
-    public function getPath() :? string
+    /**
+     * getPath
+     * @return string
+     */
+    public function getPath(): string
     {
-        return $this->path;
+        return $this->path ?? "";
     }
 
+    /**
+     * getPathAsArray
+     * @return array<string>
+     */
     public function getPathAsArray(): array
     {
         return explode('/', $this->getPath());
     }
 
-    public function setQuery(string $queryString)
+    /**
+     * setQuery
+     * @param string $queryString
+     */
+    public function setQuery(string $queryString): void
     {
         $this->query = $queryString;
     }
 
+    /**
+     * getQuery
+     * @return string
+     */
     public function getQuery(): string
     {
         return $this->query;
     }
 
-    public function setFragment(string $fragment)
+    /**
+     * setFragment
+     * @param string $fragment
+     */
+    public function setFragment(string $fragment): void
     {
         $this->fragment = $fragment;
     }
 
+    /**
+     * getFragment
+     * @return string|null
+     */
     public function getFragment(): ?string
     {
         return $this->fragment ?? null;
     }
 
+    /**
+     * getHttpStatusCode
+     * @return int|null
+     */
     public function getHttpStatusCode(): ?int
     {
-        return $this->httpStatusCode;
+        return $this->httpStatusCode ?? null;
     }
 
+    /**
+     * getHttpStatus
+     * @return string|null
+     */
     public function getHttpStatus(): ?string
     {
-        return $this->httpStatus;
+        return $this->httpStatus ?? '';
     }
 
+    /**
+     * getCurlErrorMessage
+     * @return string|null
+     */
     public function getCurlErrorMessage(): ?string
     {
-        return $this->curlErrorMessage;
+        return $this->curlErrorMessage ?? '';
     }
 
     /**
      * setAttributesFromArray
-     * @param array $urlParts
+     * @param array<string, string> $urlParts
      * the indices for the array should be the same ones produced by the php verb parse_url
      */
     public function setAttributesFromArray(array $urlParts) : void
@@ -235,11 +375,6 @@ class Url
         }
     }
 
-    public function getErrmsg(): ?MsgRetrievalInterface
-    {
-        return $this->errmsg;
-    }
-
     /**
      * generateURLString
      * @return string
@@ -262,9 +397,18 @@ class Url
         return "$scheme$user$pass$host$port$path$query$fragment";
     }
 
+    /**
+     * exists
+     * @return bool
+     * @throws CurlInitException
+     */
     public function exists(): bool
     {
-       $ch = curl_init($this->generateURLString());
+        $this->httpStatusCode = null;
+        $this->httpStatus = '';
+        $this->curlErrorMessage = '';
+
+        $ch = curl_init($this->generateURLString());
         if ($ch === false) {
             throw new CurlInitException();
         }
@@ -281,12 +425,12 @@ class Url
          * is set (which it is not).
          */
         if (false === curl_exec($ch)) {
+            $this->curlErrorMessage = curl_error($ch);
             return false;
         }
 
         $this->httpStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $this->httpStatus = $this->httpStatusCodes[$this->httpStatusCode];
-        $this->curlErrorMessage = curl_error($ch);
         @curl_close($ch);
         return ($this->httpStatusCode == 200);
     }
