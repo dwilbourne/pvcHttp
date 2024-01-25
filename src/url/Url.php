@@ -195,7 +195,10 @@ class Url
      */
     public function setPort(int|string $port): void
     {
-        if (!ctype_digit($port)) {
+        /**
+         * ctype now requires a string, using an int is deprecated
+         */
+        if (!ctype_digit((string)$port)) {
             throw new InvalidPortNumberException();
         }
         $this->port = (int)$port;
