@@ -25,6 +25,18 @@ class QueryStringTest extends TestCase
     }
 
     /**
+     * testSetGetParamNameTester
+     * @covers \pvc\http\url\QueryString::setQuerystringParamNameTester
+     * @covers \pvc\http\url\QueryString::getQuerystringParamNameTester
+     */
+    public function testSetGetParamNameTester(): void
+    {
+        $newTester = $this->createMock(ValTesterInterface::class);
+        $this->qstrObject->setQuerystringParamNameTester($newTester);
+        self::assertEquals($newTester, $this->qstrObject->getQuerystringParamNameTester());
+    }
+
+    /**
      * testAddParamThrowExceptionWithInvalidParamName
      * @throws InvalidQuerystringParamNameException
      * @covers \pvc\http\url\QueryString::addParam

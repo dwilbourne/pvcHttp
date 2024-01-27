@@ -11,13 +11,20 @@ use pvc\http\err\InvalidQuerystringParamNameException;
 use pvc\interfaces\validator\ValTesterInterface;
 
 /**
- * Encapsulate the idea of a querystring.  Feed the params attribute to http_build_query to get an encoded querystring.
+ * Class QueryString
  *
+ * Encapsulate the idea of a querystring.
  */
 class QueryString
 {
     /**
      * @var array<string, string>
+     *
+     * param name => value pairs.  Because http_build_query's first argument is an array (or an object), and because
+     * it uses the keys to the array to generate parameter names, there is no getting around the fact that the
+     * parameter names must all be unique.  So although a querystring like '?a=4&a=5' is not illegal (and who knows
+     * why you would ever want to do it), you can't generate such a thing using http_build_query, which is what the
+     * render method below uses to generate the querystring.
      */
     protected array $params = [];
 
@@ -29,6 +36,12 @@ class QueryString
 
     /**
      * @var ValTesterInterface<string>
+     *
+     * The http_build_query function has a parameter called 'numeric prefix', which will prepend a string (which
+     * must start with a letter) to a numeric array index in order to create a query parameter name.  This class
+     * takes a slightly different approach by testing each proposed parameter name before using it. So you can be as
+     * restrictive or as lax as you would like in creating parameter names.  But in theory, no testing is really
+     * required: everything gets url encoded before being transmitted anyway.......
      */
     protected ValTesterInterface $querystringParamNameTester;
 
@@ -36,6 +49,24 @@ class QueryString
      * @param ValTesterInterface<string> $querystringParamNameTester
      */
     public function __construct(ValTesterInterface $querystringParamNameTester)
+    {
+        $this->querystringParamNameTester = $querystringParamNameTester;
+    }
+
+    /**
+     * getQuerystringParamNameTester
+     * @return ValTesterInterface
+     */
+    public function getQuerystringParamNameTester(): ValTesterInterface
+    {
+        return $this->querystringParamNameTester;
+    }
+
+    /**
+     * setQuerystringParamNameTester
+     * @param ValTesterInterface $querystringParamNameTester
+     */
+    public function setQuerystringParamNameTester(ValTesterInterface $querystringParamNameTester): void
     {
         $this->querystringParamNameTester = $querystringParamNameTester;
     }
@@ -57,6 +88,9 @@ class QueryString
      * @param string $varName
      * @param string $value
      * @throws InvalidQuerystringParamNameException
+     *
+     * will overwrite duplicate parameter names
+     *
      */
     public function addParam(string $varName, string $value): void
     {
