@@ -94,7 +94,7 @@ class QueryString
      */
     public function addParam(string $varName, string $value): void
     {
-        if (!$this->querystringParamNameTester->testValue($varName)) {
+        if (!$this->getQuerystringParamNameTester()->testValue($varName)) {
             throw new InvalidQuerystringParamNameException();
         }
         $this->params[$varName] = $value;
