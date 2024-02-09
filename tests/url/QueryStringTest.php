@@ -21,7 +21,16 @@ class QueryStringTest extends TestCase
     public function setUp(): void
     {
         $this->tester = $this->createMock(ValTesterInterface::class);
-        $this->qstrObject = new QueryString($this->tester);
+        $this->qstrObject = new QueryString();
+    }
+
+    /**
+     * testGetQuerystringParamNameTesterReturnsNullWhenNotSet
+     * @covers \pvc\http\url\QueryString::getQuerystringParamNameTester
+     */
+    public function testGetQuerystringParamNameTesterReturnsNullWhenNotSet(): void
+    {
+        self::assertNull($this->qstrObject->getQuerystringParamNameTester());
     }
 
     /**
@@ -31,9 +40,8 @@ class QueryStringTest extends TestCase
      */
     public function testSetGetParamNameTester(): void
     {
-        $newTester = $this->createMock(ValTesterInterface::class);
-        $this->qstrObject->setQuerystringParamNameTester($newTester);
-        self::assertEquals($newTester, $this->qstrObject->getQuerystringParamNameTester());
+        $this->qstrObject->setQuerystringParamNameTester($this->tester);
+        self::assertEquals($this->tester, $this->qstrObject->getQuerystringParamNameTester());
     }
 
     /**
@@ -44,6 +52,7 @@ class QueryStringTest extends TestCase
     public function testAddParamThrowExceptionWithInvalidParamName(): void
     {
         $this->tester->method('testValue')->willReturn(false);
+        $this->qstrObject->setQuerystringParamNameTester($this->tester);
         $paramName = 'sum_2';
         $paramValue = '3';
         $this->expectException(InvalidQuerystringParamNameException::class);
@@ -58,6 +67,7 @@ class QueryStringTest extends TestCase
     public function testAddParam(): void
     {
         $this->tester->method('testValue')->willReturn(true);
+        $this->qstrObject->setQuerystringParamNameTester($this->tester);
         $paramName = 'sum_2';
         $paramValue = '3';
         $expectedResult = [$paramName => $paramValue];
@@ -73,6 +83,7 @@ class QueryStringTest extends TestCase
     public function testAddParams(): void
     {
         $this->tester->method('testValue')->willReturn(true);
+        $this->qstrObject->setQuerystringParamNameTester($this->tester);
         $paramName1 = 'sum_2';
         $paramValue1 = '3';
 
@@ -86,11 +97,11 @@ class QueryStringTest extends TestCase
     }
 
     /**
-     * testSetEcodingThrowsExceptionWithBadEncodingValue
+     * testSetEncodingThrowsExceptionWithBadEncodingValue
      * @throws InvalidQueryEncodingException
      * @covers \pvc\http\url\QueryString::setQueryEncoding
      */
-    public function testSetEcodingThrowsExceptionWithBadEncodingValue(): void
+    public function testSetEncodingThrowsExceptionWithBadEncodingValue(): void
     {
         $badEncodingValue = 9;
         self::expectException(InvalidQueryEncodingException::class);

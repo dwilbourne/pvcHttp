@@ -40,31 +40,23 @@ class QueryString
      * The http_build_query function has a parameter called 'numeric prefix', which will prepend a string (which
      * must start with a letter) to a numeric array index in order to create a query parameter name.  This class
      * takes a slightly different approach by testing each proposed parameter name before using it. So you can be as
-     * restrictive or as lax as you would like in creating parameter names.  But in theory, no testing is really
-     * required: everything gets url encoded before being transmitted anyway.......
+     * restrictive or as lax as you would like in creating parameter names, as long as the parameter names are strings.
+     * But in theory, no testing is really required: everything gets url encoded before being transmitted anyway.......
      */
     protected ValTesterInterface $querystringParamNameTester;
 
     /**
-     * @param ValTesterInterface<string> $querystringParamNameTester
-     */
-    public function __construct(ValTesterInterface $querystringParamNameTester)
-    {
-        $this->querystringParamNameTester = $querystringParamNameTester;
-    }
-
-    /**
      * getQuerystringParamNameTester
-     * @return ValTesterInterface
+     * @return ValTesterInterface<string>|null
      */
-    public function getQuerystringParamNameTester(): ValTesterInterface
+    public function getQuerystringParamNameTester(): ?ValTesterInterface
     {
-        return $this->querystringParamNameTester;
+        return $this->querystringParamNameTester ?? null;
     }
 
     /**
      * setQuerystringParamNameTester
-     * @param ValTesterInterface $querystringParamNameTester
+     * @param ValTesterInterface<string> $querystringParamNameTester
      */
     public function setQuerystringParamNameTester(ValTesterInterface $querystringParamNameTester): void
     {
@@ -94,7 +86,8 @@ class QueryString
      */
     public function addParam(string $varName, string $value): void
     {
-        if (!$this->getQuerystringParamNameTester()->testValue($varName)) {
+        $nameTester = $this->getQuerystringParamNameTester();
+        if ($nameTester && !$nameTester->testValue($varName)) {
             throw new InvalidQuerystringParamNameException();
         }
         $this->params[$varName] = $value;
