@@ -7,6 +7,7 @@
 namespace pvc\http\url;
 
 use pvc\http\err\InvalidQueryEncodingException;
+use pvc\http\err\InvalidQuerystringException;
 use pvc\http\err\InvalidQuerystringParamNameException;
 use pvc\interfaces\validator\ValTesterInterface;
 
@@ -86,6 +87,9 @@ class QueryString
      */
     public function addParam(string $varName, string $value): void
     {
+        if (empty($varName)) {
+            throw new InvalidQuerystringException();
+        }
         $nameTester = $this->getQuerystringParamNameTester();
         if ($nameTester && !$nameTester->testValue($varName)) {
             throw new InvalidQuerystringParamNameException();

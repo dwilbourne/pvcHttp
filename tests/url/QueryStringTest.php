@@ -9,6 +9,7 @@ namespace pvcTests\http\url;
 
 use PHPUnit\Framework\TestCase;
 use pvc\http\err\InvalidQueryEncodingException;
+use pvc\http\err\InvalidQuerystringException;
 use pvc\http\err\InvalidQuerystringParamNameException;
 use pvc\http\url\QueryString;
 use pvc\interfaces\validator\ValTesterInterface;
@@ -76,11 +77,11 @@ class QueryStringTest extends TestCase
     }
 
     /**
-     * testAddParams
+     * testSetParams
      * @covers \pvc\http\url\QueryString::setParams
      * @covers \pvc\http\url\QueryString::getParams
      */
-    public function testAddParams(): void
+    public function testSetParams(): void
     {
         $this->tester->method('testValue')->willReturn(true);
         $this->qstrObject->setQuerystringParamNameTester($this->tester);
@@ -94,6 +95,37 @@ class QueryStringTest extends TestCase
         $expectedResult = $input;
         $this->qstrObject->setParams($input);
         self::assertEqualsCanonicalizing($expectedResult, $this->qstrObject->getParams());
+    }
+
+    /**
+     * testSetParamsWithEmptyValue
+     * @throws InvalidQuerystringParamNameException
+     * @covers \pvc\http\url\QueryString::setParams
+     * @covers \pvc\http\url\QueryString::getParams
+     */
+    public function testSetParamsWithEmptyValue(): void
+    {
+        $this->tester->method('testValue')->willReturn(true);
+        $this->qstrObject->setQuerystringParamNameTester($this->tester);
+        $paramName1 = 'sum_2';
+        $paramValue1 = '';
+        $expectedResult = [$paramName1 => $paramValue1];
+        $this->qstrObject->setParams($expectedResult);
+        self::assertEqualsCanonicalizing($expectedResult, $this->qstrObject->getParams());
+    }
+
+    /**
+     * testSetParamsWithEmptyParamNameThrowsException
+     * @throws InvalidQuerystringParamNameException
+     * @covers \pvc\http\url\QueryString::setParams
+     */
+    public function testSetParamsWithEmptyParamNameThrowsException(): void
+    {
+        $paramName1 = '';
+        $paramValue1 = 'nothing';
+        $expectedResult = [$paramName1 => $paramValue1];
+        self::expectException(InvalidQuerystringException::class);
+        $this->qstrObject->setParams($expectedResult);
     }
 
     /**
