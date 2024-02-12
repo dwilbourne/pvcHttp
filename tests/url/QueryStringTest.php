@@ -159,4 +159,13 @@ class QueryStringTest extends TestCase
         $this->qstrObject->setParams($input);
         self::assertEquals($expectedResult, $this->qstrObject->render());
     }
+
+    /**
+     * testRenderReturnsEmptyStringWhenThereAreNoParameters
+     * @covers \pvc\http\url\QueryString::render
+     */
+    public function testRenderReturnsEmptyStringWhenThereAreNoParameters(): void
+    {
+        self::assertEquals('', $this->qstrObject->render());
+    }
 }

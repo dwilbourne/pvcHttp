@@ -8,12 +8,17 @@ namespace pvc\http\url;
 
 use pvc\http\err\CurlInitException;
 use pvc\http\err\InvalidPortNumberException;
+use pvc\http\err\InvalidQuerystringException;
+use pvc\interfaces\http\QueryStringInterface;
+use pvc\interfaces\http\UrlInterface;
+use pvc\interfaces\parser\ParserQueryStringInterface;
 
 /**
  * Class Url
  */
-class Url
+class Url implements UrlInterface
 {
+    protected ParserQueryStringInterface $parserQueryString;
     /**
      * @var string
      */
@@ -25,9 +30,9 @@ class Url
     protected string $host;
 
     /**
-     * @var int
+     * @var string
      */
-    protected int $port;
+    protected string $port;
 
     /**
      * @var string
@@ -44,13 +49,7 @@ class Url
      */
     protected string $path;
 
-    /**
-     * @var string
-     *
-     *  it is tempting to type this as \pvc\http\utl\QueryString, but because this class is really designed to be
-     *  hydrated by the parse_url verb, it is typed as a string for the moment
-     */
-    protected string $query;
+    protected QueryStringInterface $queryString;
 
     /**
      * @var string
@@ -143,14 +142,32 @@ class Url
     );
 
     /**
-     * @param array<string, string>|null $values
+     * @param ParserQueryStringInterface $parserQueryString
      */
-    public function __construct(array $values = null)
+    public function __construct(ParserQueryStringInterface $parserQueryString)
     {
-        if ($values) {
-            $this->setAttributesFromArray($values);
-        }
+        $this->setParserQueryString($parserQueryString);
     }
+
+    /**
+     * getParserQueryString
+     * @return ParserQueryStringInterface
+     */
+    public function getParserQueryString(): ParserQueryStringInterface
+    {
+        return $this->parserQueryString;
+    }
+
+    /**
+     * setParserQueryString
+     * @param ParserQueryStringInterface $parserQueryString
+     */
+    public function setParserQueryString(ParserQueryStringInterface $parserQueryString): void
+    {
+        $this->parserQueryString = $parserQueryString;
+    }
+
+
 
     /**
      * setScheme
@@ -163,11 +180,11 @@ class Url
 
     /**
      * getScheme
-     * @return string|null
+     * @return string
      */
-    public function getScheme(): ?string
+    public function getScheme(): string
     {
-        return $this->scheme ?? null;
+        return $this->scheme ?? '';
     }
 
     /**
@@ -181,11 +198,11 @@ class Url
 
     /**
      * getHost
-     * @return string|null
+     * @return string
      */
-    public function getHost(): ?string
+    public function getHost(): string
     {
-        return $this->host ?? null;
+        return $this->host ?? '';
     }
 
     /**
@@ -201,16 +218,16 @@ class Url
         if (!ctype_digit((string)$port)) {
             throw new InvalidPortNumberException();
         }
-        $this->port = (int)$port;
+        $this->port = (string)$port;
     }
 
     /**
      * getPort
-     * @return int|null
+     * @return string
      */
-    public function getPort(): ?int
+    public function getPort(): string
     {
-        return $this->port ?? null;
+        return $this->port ?? '';
     }
 
     /**
@@ -224,11 +241,11 @@ class Url
 
     /**
      * getUser
-     * @return string|null
+     * @return string
      */
-    public function getUser(): ?string
+    public function getUser(): string
     {
-        return $this->user ?? null;
+        return $this->user ?? '';
     }
 
     /**
@@ -242,11 +259,11 @@ class Url
 
     /**
      * getPassword
-     * @return string|null
+     * @return string
      */
-    public function getPassword(): ?string
+    public function getPassword(): string
     {
-        return $this->password ?? null;
+        return $this->password ?? '';
     }
 
     /**
@@ -266,7 +283,7 @@ class Url
      */
     public function getPath(): string
     {
-        return $this->path ?? "";
+        return $this->path ?? '';
     }
 
     /**
@@ -284,7 +301,12 @@ class Url
      */
     public function setQuery(string $queryString): void
     {
-        $this->query = $queryString;
+        if (!$this->parserQueryString->parse($queryString)) {
+            throw new InvalidQuerystringException();
+        }
+        /** @var QueryStringInterface queryString */
+        $queryString = $this->parserQueryString->getParsedValue();
+        $this->queryString = $queryString;
     }
 
     /**
@@ -293,7 +315,7 @@ class Url
      */
     public function getQuery(): string
     {
-        return $this->query;
+        return (isset($this->queryString) ? $this->queryString->render() : '');
     }
 
     /**
@@ -307,11 +329,11 @@ class Url
 
     /**
      * getFragment
-     * @return string|null
+     * @return string
      */
-    public function getFragment(): ?string
+    public function getFragment(): string
     {
-        return $this->fragment ?? null;
+        return $this->fragment ?? '';
     }
 
     /**
@@ -346,32 +368,32 @@ class Url
      * @param array<string, string> $urlParts
      * the indices for the array should be the same ones produced by the php verb parse_url
      */
-    public function setAttributesFromArray(array $urlParts) : void
+    public function setAttributesFromArray(array $urlParts): void
     {
         foreach ($urlParts as $partName => $part) {
             switch ($partName) {
-                case "scheme":
+                case 'scheme':
                     $this->setScheme($part);
                     break;
-                case "host":
+                case 'host':
                     $this->setHost($part);
                     break;
-                case "port":
+                case 'port':
                     $this->setPort($part);
                     break;
-                case "user":
+                case 'user':
                     $this->setUser($part);
                     break;
-                case "password":
+                case 'password':
                     $this->setPassword($part);
                     break;
-                case "path":
+                case 'path':
                     $this->setPath($part);
                     break;
-                case "query":
+                case 'query':
                     $this->setQuery($part);
                     break;
-                case "fragment":
+                case 'fragment':
                     $this->setFragment($part);
                     break;
             }
@@ -380,24 +402,39 @@ class Url
 
     /**
      * generateURLString
+     * @param bool $encoded
      * @return string
      *
      * urlencode / urldecode translate the percent-encoded bits as well as plus signs.  rawurlencode
      * and rawurldecode do not translate plus signs, and are designed to be compliant with RFC 3986, which specifies
      * the syntaxes for URI's, URN's and URL's.
      */
-    public function generateURLString(): string
+    public function generateURLString(bool $encoded = true): string
     {
-        $scheme = !empty($this->scheme) ? $this->scheme . '://' : '';
-        $host = !empty($this->host) ? $this->host : '';
-        $port = !empty($this->port) ? ':' . $this->port : '';
-        $user = !empty($this->user) ? $this->user : '';
-        $pass = !empty($this->password) ? ':' . $this->password : '';
-        $pass = ($user || $pass) ? "$pass@" : '';
-        $path = !empty($this->path) ? "/" . $this->path : '';
-        $query = !empty($this->query) ? '?' . $this->query : '';
-        $fragment = !empty($this->fragment) ? '#' . $this->fragment : '';
-        return "$scheme$user$pass$host$port$path$query$fragment";
+        $urlString = ($this->getScheme() ? $this->getScheme() . '://' : '');
+        $urlString .= $this->getUser();
+
+        /**
+         * user is separated from password by a colon.  Does it make sense to output a password if there is no user?
+         * For now, this outputs a password even if there is no user.
+         */
+        $urlString .= ($this->getPassword() ? ':' . $this->getPassword() : '');
+        /**
+         * separate userid / password from path with a '@'
+         */
+        if ($this->getUser() || $this->getPassword()) {
+            $urlString .= '@';
+        }
+
+        $urlString .= $this->getHost();
+        $urlString .= ($this->getPort() ? ':' . $this->getPort() : '');
+        $urlString .= ($this->getPath() ? '/' . $this->getPath() : '');
+
+        $query = $this->getQuery();
+        $urlString .= ($query ? '?' . ($encoded ? urlencode($query) : $query) : '');
+        $urlString .= ($this->getFragment() ? '#' . $this->getFragment() : '');
+
+        return $urlString;
     }
 
     /**

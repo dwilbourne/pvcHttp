@@ -97,7 +97,7 @@ class QueryString
      * getParams
      * @return array<string, string>
      */
-    public function getParams() : array
+    public function getParams(): array
     {
         return $this->params;
     }

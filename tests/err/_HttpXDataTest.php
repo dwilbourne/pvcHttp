@@ -24,6 +24,7 @@ class _HttpXDataTest extends XDataTestMaster
      * @covers \pvc\http\err\InvalidPortNumberException
      * @covers \pvc\http\err\InvalidQueryEncodingException
      * @covers \pvc\http\err\InvalidQuerystringParamNameException
+     * @covers \pvc\http\err\InvalidQuerystringException
      */
     public function testHttpXData(): void
     {
