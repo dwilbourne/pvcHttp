@@ -1,6 +1,6 @@
 {
 	"name": "pvc/http",
-	"description": "Code that handles requests, responses and urls",
+	"description": "Code that handles querystrings, urls, and mime types",
 	"type": "project",
 	"authors": [
 		{

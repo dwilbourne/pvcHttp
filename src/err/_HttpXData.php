@@ -24,6 +24,8 @@ class _HttpXData extends XDataAbstract
             InvalidQuerystringParamNameException::class => 1002,
             InvalidQueryEncodingException::class => 1003,
             InvalidQuerystringException::class => 1004,
+            MimeTypeCdnException::class => 1005,
+            MimeTypesJsonDecodingException::class => 1006,
         ];
     }
 
@@ -35,6 +37,8 @@ class _HttpXData extends XDataAbstract
             InvalidQuerystringParamNameException::class => 'Invalid querystring param name: must start with a letter and be only alphanumeric or underscore',
             InvalidQueryEncodingException::class => 'Invalid query encoding specified - see the php documentation for build_http_query',
             InvalidQuerystringException::class => 'Invalid querystring.',
+            MimeTypeCdnException::class => 'runtime exception: cdn ${cdn} containing mime types in not currently available.',
+            MimeTypesJsonDecodingException::class => 'Error decoding json string into MimeTypes object.',
         ];
     }
 }

@@ -25,6 +25,8 @@ class _HttpXDataTest extends XDataTestMaster
      * @covers \pvc\http\err\InvalidQueryEncodingException
      * @covers \pvc\http\err\InvalidQuerystringParamNameException
      * @covers \pvc\http\err\InvalidQuerystringException
+     * @covers \pvc\http\err\MimeTypeCdnException
+     * @covers \pvc\http\err\MimeTypesJsonDecodingException
      */
     public function testHttpXData(): void
     {

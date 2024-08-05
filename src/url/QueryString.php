@@ -67,6 +67,7 @@ class QueryString
     /**
      * setParams
      * @param array<string, string> $params
+     * @throws InvalidQuerystringException
      * @throws InvalidQuerystringParamNameException
      */
     public function setParams(array $params) : void
@@ -80,6 +81,7 @@ class QueryString
      * addParam
      * @param string $varName
      * @param string $value
+     * @throws InvalidQuerystringException
      * @throws InvalidQuerystringParamNameException
      *
      * will overwrite duplicate parameter names
