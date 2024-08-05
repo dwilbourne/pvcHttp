@@ -8,8 +8,8 @@ declare (strict_types=1);
 namespace pvcTests\http\mime;
 
 use PHPUnit\Framework\MockObject\MockObject;
-use pvc\http\mime\MimeTypes;
 use PHPUnit\Framework\TestCase;
+use pvc\http\mime\MimeTypes;
 use pvc\interfaces\http\mimetype\MimeTypeInterface;
 use pvc\interfaces\http\mimetype\MimeTypesSrcInterface;
 
@@ -85,5 +85,16 @@ class MimeTypesTest extends TestCase
         $this->mimeTypes = new MimeTypes($this->mimeTypesSrc);
         self::asserttrue($this->mimeTypes->isValidMimeTypeName('application/javascript'));
         self::assertFalse($this->mimeTypes->isValidMimeTypeName('foo'));
+    }
+
+    /**
+     * testIsValidMimeTypeExtension
+     * @covers \pvc\http\mime\MimeTypes::isValidMimeTypeFileExtension
+     */
+    public function testIsValidMimeTypeExtension(): void
+    {
+        $this->mimeTypes = new MimeTypes($this->mimeTypesSrc);
+        self::asserttrue($this->mimeTypes->isValidMimeTypeFileExtension('jpg'));
+        self::assertFalse($this->mimeTypes->isValidMimeTypeFileExtension('foo'));
     }
 }

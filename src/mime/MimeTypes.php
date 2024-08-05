@@ -59,4 +59,17 @@ class MimeTypes implements MimeTypesInterface
     {
         return isset($this->mimetypes[$mimeTypeName]);
     }
+
+    /**
+     * { @inheritDoc }
+     */
+    public function isValidMimeTypeFileExtension(string $fileExt): bool
+    {
+        foreach ($this->mimetypes as $mimeTypeName => $mimetype) {
+            if (in_array($fileExt, $mimetype->getFileExtensions())) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
