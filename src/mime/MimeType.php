@@ -22,6 +22,8 @@ class MimeType implements MimeTypeInterface
 
     /**
      * @var array<string>
+     * file extensions do NOT have the dot separator "." in this array.  E.g. you can
+     * find the file extension 'jpg' but not '.jpg'
      */
     protected array $fileExtensions = [];
 
@@ -34,7 +36,7 @@ class MimeType implements MimeTypeInterface
     }
 
     /**
-     * @inheritDoc
+     * { @inheritDoc }
      */
     public function setMimeTypeName(string $mimeTypeName): void
     {
