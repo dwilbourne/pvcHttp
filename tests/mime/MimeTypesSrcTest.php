@@ -8,17 +8,17 @@ declare (strict_types=1);
 
 namespace pvcTests\http\mime;
 
-use pvc\http\mime\MimeTypesSrcMimeDb;
 use PHPUnit\Framework\TestCase;
+use pvc\http\mime\MimeTypesSrc;
 use pvc\interfaces\http\mimetype\MimeTypeFactoryInterface;
 use pvc\interfaces\http\mimetype\MimeTypeInterface;
 
-class MimeTypesSrcMimeDbTest extends TestCase
+class MimeTypesSrcTest extends TestCase
 {
     /**
-     * @var MimeTypesSrcMimeDb
+     * @var MimeTypesSrc
      */
-    protected MimeTypesSrcMimeDb $mimeDb;
+    protected MimeTypesSrc $mimeTypesSrc;
 
     protected MimeTypeFactoryInterface $mimeTypeFactory;
 
@@ -34,7 +34,7 @@ class MimeTypesSrcMimeDbTest extends TestCase
     public function setUp(): void
     {
         $this->mimeTypeFactory = $this->createMock(MimeTypeFactoryInterface::class);
-        $this->mimeDb = new MimeTypesSrcMimeDb($this->mimeTypeFactory);
+        $this->mimeTypesSrc = new MimeTypesSrc($this->mimeTypeFactory);
     }
 
     /**
@@ -43,7 +43,7 @@ class MimeTypesSrcMimeDbTest extends TestCase
      */
     public function testConstruct(): void
     {
-        self::assertInstanceOf(MimeTypesSrcMimeDb::class, $this->mimeDb);
+        self::assertInstanceOf(MimeTypesSrc::class, $this->mimeTypesSrc);
     }
 
     /**
@@ -53,17 +53,17 @@ class MimeTypesSrcMimeDbTest extends TestCase
      */
     public function testInitializeMimeTypeData(): void
     {
-        $this->mimeDb->initializeMimeTypeData();
+        $this->mimeTypesSrc->initializeMimeTypeData();
 
         /**
          * verify that the array is not empty
          */
-        self::assertNotEmpty($this->mimeDb->getRawMimeTypeData());
+        self::assertNotEmpty($this->mimeTypesSrc->getRawMimeTypeData());
 
         /**
          * illustrate that the keys in the raw data are mime types and the values are objects
          */
-        $rawData = $this->mimeDb->getRawMimeTypeData();
+        $rawData = $this->mimeTypesSrc->getRawMimeTypeData();
         foreach ($this->testMimeTypes as $mimeType) {
             self::assertIsObject($rawData[$mimeType]);
         }
@@ -77,10 +77,10 @@ class MimeTypesSrcMimeDbTest extends TestCase
      */
     public function testGetMimeTypes(): void
     {
-        $this->mimeDb->initializeMimeTypeData();
+        $this->mimeTypesSrc->initializeMimeTypeData();
         $mimeTypeMock = $this->createMock(MimeTypeInterface::class);
         $this->mimeTypeFactory->expects($this->any())->method('makeMimeType')->willReturn($mimeTypeMock);
-        $mimeTypesArray = $this->mimeDb->getMimeTypes();
+        $mimeTypesArray = $this->mimeTypesSrc->getMimeTypes();
         foreach ($this->testMimeTypes as $mimeType) {
             self::assertInstanceOf(MimeTypeInterface::class, $mimeTypesArray[$mimeType]);
         }

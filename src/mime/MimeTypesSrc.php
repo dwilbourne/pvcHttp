@@ -17,7 +17,7 @@ use pvc\interfaces\http\mimetype\MimeTypesSrcInterface;
 /**
  * Class MimeTypesSrcMimeDb
  */
-class MimeTypesSrcMimeDb implements MimeTypesSrcInterface
+class MimeTypesSrc implements MimeTypesSrcInterface
 {
     /**
      * @var array<string, object{'source': string, 'extensions': array<string>, 'compressible': bool, 'charset': string}>}>
