@@ -15,6 +15,9 @@ use pvc\interfaces\parser\ParserQueryStringInterface;
 
 /**
  * Class Url
+ *
+ * This class is somewhat limited in scope because php has pretty good verbs for doing url-related tasks already.
+ * parse_url can be used to test whether a string is syntactically viable as a url.
  */
 class Url implements UrlInterface
 {
@@ -143,6 +146,8 @@ class Url implements UrlInterface
 
     /**
      * @param ParserQueryStringInterface $parserQueryString
+     * pvc provides a class called ParserQueryString as well as a Querystring object.  For more information on why
+     * these classes were created, see their documentation.
      */
     public function __construct(ParserQueryStringInterface $parserQueryString)
     {
