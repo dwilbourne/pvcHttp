@@ -10,8 +10,8 @@ namespace pvcTests\http\mime;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use pvc\http\mime\MimeTypes;
-use pvc\interfaces\http\mimetype\MimeTypeInterface;
-use pvc\interfaces\http\mimetype\MimeTypesSrcInterface;
+use pvc\interfaces\http\mime\MimeTypeInterface;
+use pvc\interfaces\http\mime\MimeTypesSrcInterface;
 
 class MimeTypesTest extends TestCase
 {

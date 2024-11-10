@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace pvc\http\mime;
 
-use pvc\interfaces\http\mimetype\MimeTypeInterface;
+use pvc\interfaces\http\mime\MimeTypeInterface;
 
 /**
  * Class MimeType

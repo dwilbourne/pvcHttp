@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace pvc\http\mime;
 
-use pvc\interfaces\http\mimetype\MimeTypeFactoryInterface;
+use pvc\interfaces\http\mime\MimeTypeFactoryInterface;
 
 /**
  * Class MimeTypeFactory

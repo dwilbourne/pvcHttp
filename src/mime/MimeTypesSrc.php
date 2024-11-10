@@ -10,9 +10,9 @@ namespace pvc\http\mime;
 
 use pvc\http\err\MimeTypeCdnException;
 use pvc\http\err\MimeTypesJsonDecodingException;
-use pvc\interfaces\http\mimetype\MimeTypeFactoryInterface;
-use pvc\interfaces\http\mimetype\MimeTypeInterface;
-use pvc\interfaces\http\mimetype\MimeTypesSrcInterface;
+use pvc\interfaces\http\mime\MimeTypeFactoryInterface;
+use pvc\interfaces\http\mime\MimeTypeInterface;
+use pvc\interfaces\http\mime\MimeTypesSrcInterface;
 
 /**
  * Class MimeTypesSrcMimeDb
