@@ -23,9 +23,6 @@ use pvc\interfaces\http\mime\MimeTypesSrcInterface;
  */
 class MimeTypes implements MimeTypesInterface
 {
-    public const DETECT_FROM_CONTENTS = 1;
-    public const USE_FILE_EXTENSION = 2;
-
     /**
      * @var array <string, MimeTypeInterface>
      */
