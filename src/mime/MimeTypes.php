@@ -14,6 +14,7 @@ use pvc\http\err\ConflictingMimeTypesException;
 use pvc\http\err\InvalidMimeDetectionConstantException;
 use pvc\http\err\UnknownMimeTypeDetectedException;
 use pvc\interfaces\http\mime\MimeTypeInterface;
+use pvc\interfaces\http\mime\MimeTypesCacheInterface;
 use pvc\interfaces\http\mime\MimeTypesInterface;
 use pvc\interfaces\http\mime\MimeTypesSrcInterface;
 
@@ -32,11 +33,21 @@ class MimeTypes implements MimeTypesInterface
 
     /**
      * @param MimeTypesSrcInterface $mimeTypesSrc
+     * @param MimeTypesCacheInterface|null $cache
      */
-    public function __construct(MimeTypesSrcInterface $mimeTypesSrc)
+    public function __construct(
+        protected MimeTypesSrcInterface    $mimeTypesSrc,
+        protected ?MimeTypesCacheInterface $cache = null,
+    )
     {
-        $mimeTypesSrc->initializeMimeTypeData();
-        $this->mimetypes = $mimeTypesSrc->getMimeTypes();
+        if (!$this->cache) {
+            $this->mimetypes = $this->mimeTypesSrc->getMimeTypes();
+        } else {
+            if (!$this->cache->get('mimeTypes')) {
+                $this->cache->set('mimeTypes', $this->mimeTypesSrc->getMimeTypes());
+            }
+            $this->mimetypes = $this->cache->get('mimeTypes');
+        }
     }
 
     /**
@@ -136,6 +147,4 @@ class MimeTypes implements MimeTypesInterface
         assert($result instanceof MimeTypeInterface);
         return $result;
     }
-
-
 }

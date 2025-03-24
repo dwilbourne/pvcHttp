@@ -14,11 +14,9 @@ use pvc\err\pvc\file\FileNotReadableException;
 use pvc\http\err\ConflictingMimeTypesException;
 use pvc\http\err\InvalidMimeDetectionConstantException;
 use pvc\http\err\UnknownMimeTypeDetectedException;
-use pvc\http\mime\MimeType;
-use pvc\http\mime\MimeTypeFactory;
 use pvc\http\mime\MimeTypes;
-use pvc\http\mime\MimeTypesSrc;
 use pvc\interfaces\http\mime\MimeTypeInterface;
+use pvc\interfaces\http\mime\MimeTypesCacheInterface;
 use pvc\interfaces\http\mime\MimeTypesSrcInterface;
 
 class MimeTypesTest extends TestCase
@@ -31,9 +29,19 @@ class MimeTypesTest extends TestCase
     protected MimeTypes $mimeTypes;
 
     /**
+     * @var array<string, MimeTypeInterface>
+     */
+    protected array $mimeTypeArray;
+
+    /**
      * @var MimeTypesSrcInterface|MockObject
      */
     protected MimeTypesSrcInterface|MockObject $mimeTypesSrc;
+
+    /**
+     * @var MimeTypesCacheInterface
+     */
+    protected MimeTypesCacheInterface $mimeTypesCache;
 
     public function setUp(): void
     {
@@ -45,10 +53,13 @@ class MimeTypesTest extends TestCase
         $mimeTypeB->method('getMimeTypeName')->willReturn('image/jpeg');
         $mimeTypeB->method('getFileExtensions')->willReturn(['jpeg', 'jpg']);
 
-        $mimeTypeArray = ['application/javascript' => $mimeTypeA, 'image/jpeg' => $mimeTypeB];
+        $this->mimeTypeArray = ['application/javascript' => $mimeTypeA, 'image/jpeg' => $mimeTypeB];
 
         $this->mimeTypesSrc = $this->createMock(MimeTypesSrcInterface::class);
-        $this->mimeTypesSrc->method('getMimeTypes')->willReturn($mimeTypeArray);
+        $this->mimeTypesSrc->method('getMimeTypes')->willReturn($this->mimeTypeArray);
+
+        $this->mimeTypesCache = $this->createMock(MimeTypesCacheInterface::class);
+
         $this->mimeTypes = new MimeTypes($this->mimeTypesSrc);
     }
 
@@ -56,11 +67,23 @@ class MimeTypesTest extends TestCase
      * testConstruct
      * @covers \pvc\http\mime\MimeTypes::__construct
      */
-    public function testConstruct(): void
+    public function testConstructNoCache(): void
     {
-        $this->mimeTypesSrc->expects($this->once())->method('initializeMimeTypeData');
-        $mimeTypes = new MimeTypes($this->mimeTypesSrc);
-        self::assertInstanceOf(MimeTypes::class, $mimeTypes);
+        self::assertInstanceOf(MimeTypes::class, $this->mimeTypes);
+    }
+
+    /**
+     * @return void
+     * @covers MimeTypes::__construct
+     */
+    public function testConstructWithCache(): void
+    {
+        /**
+         * called once to see if the array is in the cache.  Called a second time to set the value of the mimeTypes property
+         */
+        $this->mimeTypesCache->expects($this->exactly(2))->method('get')->with('mimeTypes')->willReturn([]);
+        $this->mimeTypesCache->expects($this->once())->method('set')->with('mimeTypes', $this->mimeTypeArray, null);
+        $this->mimeTypes = new MimeTypes($this->mimeTypesSrc, $this->mimeTypesCache);
     }
 
     /**

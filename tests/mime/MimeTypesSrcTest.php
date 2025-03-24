@@ -9,16 +9,16 @@ declare (strict_types=1);
 namespace pvcTests\http\mime;
 
 use PHPUnit\Framework\TestCase;
-use pvc\http\mime\MimeTypesSrc;
+use pvc\http\mime\MimeTypesSrcJsDelivr;
 use pvc\interfaces\http\mime\MimeTypeFactoryInterface;
 use pvc\interfaces\http\mime\MimeTypeInterface;
 
 class MimeTypesSrcTest extends TestCase
 {
     /**
-     * @var MimeTypesSrc
+     * @var MimeTypesSrcJsDelivr
      */
-    protected MimeTypesSrc $mimeTypesSrc;
+    protected MimeTypesSrcJsDelivr $mimeTypesSrc;
 
     protected MimeTypeFactoryInterface $mimeTypeFactory;
 
@@ -34,50 +34,26 @@ class MimeTypesSrcTest extends TestCase
     public function setUp(): void
     {
         $this->mimeTypeFactory = $this->createMock(MimeTypeFactoryInterface::class);
-        $this->mimeTypesSrc = new MimeTypesSrc($this->mimeTypeFactory);
+        $this->mimeTypesSrc = new MimeTypesSrcJsDelivr($this->mimeTypeFactory);
     }
 
     /**
      * testConstruct
-     * @covers \pvc\http\mime\MimeTypesSrc::__construct
+     * @covers \pvc\http\mime\MimeTypesSrcJsDelivr::__construct
      */
     public function testConstruct(): void
     {
-        self::assertInstanceOf(MimeTypesSrc::class, $this->mimeTypesSrc);
-    }
-
-    /**
-     * testGetMimeTypeData
-     * @throws \pvc\http\err\MimeTypeCdnException
-     * @throws \pvc\http\err\MimeTypesJsonDecodingException
-     */
-    public function testInitializeMimeTypeData(): void
-    {
-        $this->mimeTypesSrc->initializeMimeTypeData();
-
-        /**
-         * verify that the array is not empty
-         */
-        self::assertNotEmpty($this->mimeTypesSrc->getRawMimeTypeData());
-
-        /**
-         * illustrate that the keys in the raw data are mime types and the values are objects
-         */
-        $rawData = $this->mimeTypesSrc->getRawMimeTypeData();
-        foreach ($this->testMimeTypes as $mimeType) {
-            self::assertIsObject($rawData[$mimeType]);
-        }
+        self::assertInstanceOf(MimeTypesSrcJsDelivr::class, $this->mimeTypesSrc);
     }
 
     /**
      * testGetMimeTypes
      * @throws \pvc\http\err\MimeTypeCdnException
      * @throws \pvc\http\err\MimeTypesJsonDecodingException
-     * @covers \pvc\http\mime\MimeTypesSrc::getMimeTypes
+     * @covers \pvc\http\mime\MimeTypesSrcJsDelivr::getMimeTypes
      */
     public function testGetMimeTypes(): void
     {
-        $this->mimeTypesSrc->initializeMimeTypeData();
         $mimeTypeMock = $this->createMock(MimeTypeInterface::class);
         $this->mimeTypeFactory->expects($this->any())->method('makeMimeType')->willReturn($mimeTypeMock);
         $mimeTypesArray = $this->mimeTypesSrc->getMimeTypes();
