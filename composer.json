@@ -24,12 +24,14 @@
 		"ext-mbstring": "*",
 		"ext-ctype": "*",
 		"pvc/interfaces": "*",
-		"pvc/err": "*"
-	},
+		"pvc/err": "*",
+      	"ext-fileinfo": "*"
+    },
 	"require-dev": {
 		"phpunit/phpunit": "^9",
 		"squizlabs/php_codesniffer": "*",
 		"friendsofphp/php-cs-fixer": "*",
-		"phpstan/phpstan": "*"
+		"phpstan/phpstan": "*",
+		"ext-uopz": "*"
 	}
 }

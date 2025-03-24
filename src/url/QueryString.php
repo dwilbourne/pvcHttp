@@ -42,7 +42,8 @@ class QueryString
      * must start with a letter) to a numeric array index in order to create a query parameter name.  This class
      * takes a slightly different approach by testing each proposed parameter name before using it. So you can be as
      * restrictive or as lax as you would like in creating parameter names, as long as the parameter names are strings.
-     * But in theory, no testing is really required: everything gets url encoded before being transmitted anyway.......
+     * But in theory, no testing is really required: everything gets url encoded before being transmitted anyway.
+     * There are no restrictions on escaped parameter names in the URI specs.
      */
     protected ValTesterInterface $querystringParamNameTester;
 

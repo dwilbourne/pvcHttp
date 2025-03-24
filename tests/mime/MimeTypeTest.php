@@ -7,8 +7,15 @@ declare (strict_types=1);
 
 namespace pvcTests\http\mime;
 
+use pvc\err\pvc\file\FileDoesNotExistException;
+use pvc\err\pvc\file\FileNotReadableException;
+use pvc\http\err\ConflictingMimeTypesException;
+use pvc\http\err\InvalidMimeDetectionConstantException;
 use pvc\http\mime\MimeType;
 use PHPUnit\Framework\TestCase;
+use pvc\http\mime\MimeTypeFactory;
+use pvc\http\mime\MimeTypes;
+use pvc\http\mime\MimeTypesSrc;
 
 class MimeTypeTest extends TestCase
 {
@@ -44,4 +51,5 @@ class MimeTypeTest extends TestCase
         $this->mimeType->setFileExtensions($testFileExtensions);
         self::assertEquals($testFileExtensions, $this->mimeType->getFileExtensions());
     }
+
 }

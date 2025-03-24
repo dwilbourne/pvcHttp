@@ -282,24 +282,24 @@ class UrlTest extends TestCase
      * testMakeCurlInitFail
      * @throws CurlInitException
      * @covers \pvc\http\url\Url::exists
-     *
-     * dunno how to make curl_init fail at the moment.....
+     * @runInSeparateProcess
      */
-    /*
-    public function testMakeCurlInitFail(): void
+    public function testThrowsExceptionWhenCurlInitReturnsFalse(): void
     {
-        $this->url->setScheme("H^\f9%");
+        $this->url->setScheme('http');
+        $this->url->setHost('somebadhost');
+        uopz_set_return('curl_init', false);
         self::expectException(CurlInitException::class);
         $this->url->exists();
+        uopz_unset_return('curl_init');
     }
-    */
 
     /**
      * testExists
      * @throws \pvc\http\err\CurlInitException
      * @covers \pvc\http\url\Url::exists
-     * @covers Url::getHttpStatus
-     * @covers Url::getHttpStatusCode
+     * @covers \pvc\http\url\Url::getHttpStatusCode
+     * @covers \pvc\http\url\Url::getHttpStatus
      */
     public function testExists(): void
     {

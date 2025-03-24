@@ -39,7 +39,7 @@ class MimeTypesSrcTest extends TestCase
 
     /**
      * testConstruct
-     * @covers \pvc\http\mime\MimeTypesSrcMimeDb::__construct
+     * @covers \pvc\http\mime\MimeTypesSrc::__construct
      */
     public function testConstruct(): void
     {
@@ -73,7 +73,7 @@ class MimeTypesSrcTest extends TestCase
      * testGetMimeTypes
      * @throws \pvc\http\err\MimeTypeCdnException
      * @throws \pvc\http\err\MimeTypesJsonDecodingException
-     * @covers \pvc\http\mime\MimeTypesSrcMimeDb::getMimeTypes
+     * @covers \pvc\http\mime\MimeTypesSrc::getMimeTypes
      */
     public function testGetMimeTypes(): void
     {

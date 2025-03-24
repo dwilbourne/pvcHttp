@@ -20,6 +20,7 @@ class _HttpXDataTest extends XDataTestMaster
      * @throws \ReflectionException
      * @covers \pvc\http\err\_HttpXData::getLocalXCodes
      * @covers \pvc\http\err\_HttpXData::getXMessageTemplates
+     * @covers \pvc\http\err\ConflictingMimeTypesException
      * @covers \pvc\http\err\CurlInitException
      * @covers \pvc\http\err\InvalidPortNumberException
      * @covers \pvc\http\err\InvalidQueryEncodingException
@@ -27,6 +28,8 @@ class _HttpXDataTest extends XDataTestMaster
      * @covers \pvc\http\err\InvalidQuerystringException
      * @covers \pvc\http\err\MimeTypeCdnException
      * @covers \pvc\http\err\MimeTypesJsonDecodingException
+     * @covers \pvc\http\err\InvalidMimeDetectionConstantException
+     * @covers \pvc\http\err\UnknownMimeTypeDetectedException
      */
     public function testHttpXData(): void
     {

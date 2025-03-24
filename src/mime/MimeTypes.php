@@ -8,6 +8,12 @@ declare(strict_types=1);
 
 namespace pvc\http\mime;
 
+use pvc\err\pvc\file\FileDoesNotExistException;
+use pvc\err\pvc\file\FileNotReadableException;
+use pvc\http\err\ConflictingMimeTypesException;
+use pvc\http\err\InvalidMimeDetectionConstantException;
+use pvc\http\err\UnknownMimeTypeDetectedException;
+use pvc\interfaces\http\mime\MimeTypeInterface;
 use pvc\interfaces\http\mime\MimeTypesInterface;
 use pvc\interfaces\http\mime\MimeTypesSrcInterface;
 
@@ -16,8 +22,11 @@ use pvc\interfaces\http\mime\MimeTypesSrcInterface;
  */
 class MimeTypes implements MimeTypesInterface
 {
+    public const DETECT_FROM_CONTENTS = 1;
+    public const USE_FILE_EXTENSION = 2;
+
     /**
-     * @var array <string, \pvc\interfaces\http\mimetype\MimeTypeInterface>
+     * @var array <string, MimeTypeInterface>
      */
     protected array $mimetypes;
 
@@ -28,6 +37,15 @@ class MimeTypes implements MimeTypesInterface
     {
         $mimeTypesSrc->initializeMimeTypeData();
         $this->mimetypes = $mimeTypesSrc->getMimeTypes();
+    }
+
+    /**
+     * @param string $mimeTypeName
+     * @return MimeTypeInterface|null
+     */
+    public function getMimeType(string $mimeTypeName): ?MimeTypeInterface
+    {
+        return $this->mimetypes[$mimeTypeName] ?? null;
     }
 
     /**
@@ -72,4 +90,52 @@ class MimeTypes implements MimeTypesInterface
         }
         return false;
     }
+
+    private function validateMimeTypeDetectionMethods(int $detectionMethods): bool
+    {
+        return (($detectionMethods & self::DETECT_FROM_CONTENTS) || ($detectionMethods & self::USE_FILE_EXTENSION));
+    }
+
+    public function detect(string $filePath, int $detectionMethods): MimeTypeInterface
+    {
+        if (!file_exists($filePath)) {
+            throw new FileDoesNotExistException($filePath);
+        }
+        if (!is_readable($filePath)) {
+            throw new FileNotReadableException($filePath);
+        }
+        if (!$this->validateMimeTypeDetectionMethods($detectionMethods)) {
+            throw new InvalidMimeDetectionConstantException();
+        }
+        if ($detectionMethods & self::DETECT_FROM_CONTENTS) {
+            /**
+             * mime_content_type can return false if it is unable to detect the mime type.  Less likely, it could
+             * conceivably return a mime type that is unknown in the list of mime types supplied by the cdn that
+             * this library is using
+             */
+            $detected = mime_content_type($filePath) ?: '';
+            if (!$contentMimeType = $this->getMimeType($detected)) {
+                throw new UnknownMimeTypeDetectedException($detected, $filePath);
+            }
+        } else {
+            $contentMimeType = null;
+        }
+
+        if ($detectionMethods & self::USE_FILE_EXTENSION) {
+            $mimeTypeName = $this->getMimeTypeNameFromFileExtension(pathinfo($filePath, PATHINFO_EXTENSION)) ?: '';
+            $fileExtensionMimeType = $this->getMimeType($mimeTypeName);
+        } else {
+            $fileExtensionMimeType = null;
+        }
+
+        if (($contentMimeType && $fileExtensionMimeType) && $contentMimeType !== $fileExtensionMimeType) {
+            throw new ConflictingMimeTypesException($filePath);
+        }
+
+        $result = $contentMimeType ?: $fileExtensionMimeType;
+        assert($result instanceof MimeTypeInterface);
+        return $result;
+    }
+
+
 }

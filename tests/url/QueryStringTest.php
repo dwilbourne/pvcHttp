@@ -61,6 +61,20 @@ class QueryStringTest extends TestCase
     }
 
     /**
+     * @return void
+     * @throws InvalidQuerystringException
+     * @throws InvalidQuerystringParamNameException
+     * @covers \pvc\http\url\QueryString::addParam
+     */
+    public function testAddParamThrowsExceptionWithEmptyParamName(): void
+    {
+        $paramName = '';
+        $paramValue = '3';
+        $this->expectException(InvalidQuerystringException::class);
+        $this->qstrObject->addParam($paramName, $paramValue);
+    }
+
+    /**
      * testAddParam
      * @throws \pvc\http\err\InvalidQuerystringParamNameException
      * @covers \pvc\http\url\QueryString::addParam
@@ -142,7 +156,7 @@ class QueryStringTest extends TestCase
 
     /**
      * testQueryEncodingDefaultValueIsSet
-     * @covers \pvc\http\url\QueryString::__construct
+     * @covers \pvc\http\url\QueryString
      */
     public function testQueryEncodingDefaultValueIsSet(): void
     {

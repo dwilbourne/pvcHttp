@@ -15,7 +15,7 @@ use Throwable;
  */
 class MimeTypeCdnException extends RuntimeException
 {
-    public function __construct(string $cdn, Throwable $prev = null)
+    public function __construct(string $cdn, ?Throwable $prev = null)
     {
         parent::__construct($cdn, $prev);
     }

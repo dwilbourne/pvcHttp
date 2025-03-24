@@ -26,6 +26,9 @@ class _HttpXData extends XDataAbstract
             InvalidQuerystringException::class => 1004,
             MimeTypeCdnException::class => 1005,
             MimeTypesJsonDecodingException::class => 1006,
+            InvalidMimeDetectionConstantException::class => 1007,
+            ConflictingMimeTypesException::class => 1008,
+            UnknownMimeTypeDetectedException::class => 1009,
         ];
     }
 
@@ -39,6 +42,9 @@ class _HttpXData extends XDataAbstract
             InvalidQuerystringException::class => 'Invalid querystring.',
             MimeTypeCdnException::class => 'runtime exception: cdn ${cdn} containing mime types in not currently available.',
             MimeTypesJsonDecodingException::class => 'Error decoding json string into MimeTypes object.',
+            InvalidMimeDetectionConstantException::class => 'Invalid MimeType class constant used as parameter to setMimeTypeDetection',
+            ConflictingMimeTypesException::class => 'Mime type detected from file ${filePath} and file extension do not agree.',
+            UnknownMimeTypeDetectedException::class => 'Unknown mime type ${mimeType} detected from php function mime_content_type in file ${filePath}.',
         ];
     }
 }
