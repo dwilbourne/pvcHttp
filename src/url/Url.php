@@ -11,7 +11,6 @@ use pvc\http\err\InvalidPortNumberException;
 use pvc\http\err\InvalidQuerystringException;
 use pvc\interfaces\http\QueryStringInterface;
 use pvc\interfaces\http\UrlInterface;
-use pvc\interfaces\parser\ParserQueryStringInterface;
 
 /**
  * Class Url
@@ -21,7 +20,6 @@ use pvc\interfaces\parser\ParserQueryStringInterface;
  */
 class Url implements UrlInterface
 {
-    protected ParserQueryStringInterface $parserQueryString;
     /**
      * @var string
      */
@@ -58,16 +56,6 @@ class Url implements UrlInterface
      * @var string
      */
     protected string $fragment;
-
-    /**
-     * @var int|null
-     */
-    protected int|null $httpStatusCode;
-
-    /**
-     * @var string
-     */
-    protected string $httpStatus;
 
     /**
      * @var string
@@ -145,33 +133,26 @@ class Url implements UrlInterface
     );
 
     /**
-     * @param ParserQueryStringInterface $parserQueryString
-     * pvc provides a class called ParserQueryString as well as a Querystring object.  For more information on why
-     * these classes were created, see their documentation.
+     * @var non-empty-string
      */
-    public function __construct(ParserQueryStringInterface $parserQueryString)
+    protected string $qstrSeparator = '&';
+
+    /**
+     * @param int $code
+     * @return string|null
+     */
+    public function getHttpStatusFromCode(int $code): ?string
     {
-        $this->setParserQueryString($parserQueryString);
+        return $this->httpStatusCodes[$code] ?? null;
     }
 
     /**
-     * getParserQueryString
-     * @return ParserQueryStringInterface
+     * @param QueryStringInterface $queryString
      */
-    public function getParserQueryString(): ParserQueryStringInterface
+    public function __construct(QueryStringInterface $queryString)
     {
-        return $this->parserQueryString;
+        $this->setQueryString($queryString);
     }
-
-    /**
-     * setParserQueryString
-     * @param ParserQueryStringInterface $parserQueryString
-     */
-    public function setParserQueryString(ParserQueryStringInterface $parserQueryString): void
-    {
-        $this->parserQueryString = $parserQueryString;
-    }
-
 
 
     /**
@@ -302,25 +283,20 @@ class Url implements UrlInterface
 
     /**
      * setQuery
-     * @param string $queryString
+     * @param QueryStringInterface $queryString
      */
-    public function setQuery(string $queryString): void
+    public function setQueryString(QueryStringInterface $queryString): void
     {
-        if (!$this->parserQueryString->parse($queryString)) {
-            throw new InvalidQuerystringException();
-        }
-        /** @var QueryStringInterface queryString */
-        $queryString = $this->parserQueryString->getParsedValue();
         $this->queryString = $queryString;
     }
 
     /**
      * getQuery
-     * @return string
+     * @return QueryStringInterface
      */
-    public function getQuery(): string
+    public function getQueryString(): QueryStringInterface
     {
-        return (isset($this->queryString) ? $this->queryString->render() : '');
+        return $this->queryString;
     }
 
     /**
@@ -342,24 +318,6 @@ class Url implements UrlInterface
     }
 
     /**
-     * getHttpStatusCode
-     * @return int|null
-     */
-    public function getHttpStatusCode(): ?int
-    {
-        return $this->httpStatusCode ?? null;
-    }
-
-    /**
-     * getHttpStatus
-     * @return string|null
-     */
-    public function getHttpStatus(): ?string
-    {
-        return $this->httpStatus ?? '';
-    }
-
-    /**
      * getCurlErrorMessage
      * @return string|null
      */
@@ -372,6 +330,7 @@ class Url implements UrlInterface
      * setAttributesFromArray
      * @param array<string, string> $urlParts
      * the indices for the array should be the same ones produced by the php verb parse_url
+     * @throws InvalidQuerystringException
      */
     public function setAttributesFromArray(array $urlParts): void
     {
@@ -396,7 +355,9 @@ class Url implements UrlInterface
                     $this->setPath($part);
                     break;
                 case 'query':
-                    $this->setQuery($part);
+                    foreach ($this->parseQueryString($part) as $name => $value) {
+                        $this->queryString->addParam($name, $value);
+                    }
                     break;
                 case 'fragment':
                     $this->setFragment($part);
@@ -404,6 +365,42 @@ class Url implements UrlInterface
             }
         }
     }
+
+    /**
+     * @param string $data
+     * @return array<string, string>
+     * @throws InvalidQuerystringException
+     * replacement for parse_str that does not mangle parameter names
+     */
+    protected function parseQueryString(string $data): array
+    {
+        $params = [];
+        $data = trim($data, '?');
+
+        $paramStrings = explode($this->qstrSeparator, $data);
+
+        foreach ($paramStrings as $paramString) {
+            $array = explode('=', $paramString);
+
+            /**
+             * cannot have a string like 'a=1=2'.  Need 0 or 1 equals signs.  Zero equals signs is a parameter with no
+             * value attached
+             */
+            if (count($array) > 2) {
+                throw new InvalidQuerystringException();
+            }
+
+            $paramName = $array[0];
+            $paramValue = $array[1] ?? '';
+
+            /**
+             * if the parameter name is duplicated in the querystring, this results in the last value being used
+             */
+            $params[$paramName] = $paramValue;
+        }
+        return $params;
+    }
+
 
     /**
      * generateURLString
@@ -435,7 +432,7 @@ class Url implements UrlInterface
         $urlString .= ($this->getPort() ? ':' . $this->getPort() : '');
         $urlString .= ($this->getPath() ? '/' . $this->getPath() : '');
 
-        $query = $this->getQuery();
+        $query = $this->getQueryString()->render();
         $urlString .= ($query ? '?' . ($encoded ? urlencode($query) : $query) : '');
         $urlString .= ($this->getFragment() ? '#' . $this->getFragment() : '');
 
@@ -444,13 +441,12 @@ class Url implements UrlInterface
 
     /**
      * exists
-     * @return bool
+     * @return int
      * @throws CurlInitException
+     * returns -1 if the curl_exec call fails, otherwise returns an http status code
      */
-    public function exists(): bool
+    public function sendRequest(): int
     {
-        $this->httpStatusCode = null;
-        $this->httpStatus = '';
         $this->curlErrorMessage = '';
 
         $ch = curl_init($this->generateURLString());
@@ -471,12 +467,9 @@ class Url implements UrlInterface
          */
         if (false === curl_exec($ch)) {
             $this->curlErrorMessage = curl_error($ch);
-            return false;
+            return -1;
         }
-
-        $this->httpStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $this->httpStatus = $this->httpStatusCodes[$this->httpStatusCode];
         @curl_close($ch);
-        return ($this->httpStatusCode == 200);
+        return curl_getinfo($ch, CURLINFO_HTTP_CODE);
     }
 }

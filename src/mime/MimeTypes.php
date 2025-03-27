@@ -29,22 +29,11 @@ class MimeTypes implements MimeTypesInterface
     protected array $mimetypes;
 
     /**
-     * @param MimeTypesSrcInterface $mimeTypesSrc
-     * @param MimeTypesCacheInterface|null $cache
+     * @param MimeTypesSrcInterface|MimeTypesCacheInterface $src
      */
-    public function __construct(
-        protected MimeTypesSrcInterface    $mimeTypesSrc,
-        protected ?MimeTypesCacheInterface $cache = null,
-    )
+    public function __construct(MimeTypesSrcInterface|MimeTypesCacheInterface $src)
     {
-        if (!$this->cache) {
-            $this->mimetypes = $this->mimeTypesSrc->getMimeTypes();
-        } else {
-            if (!$this->cache->get('mimeTypes')) {
-                $this->cache->set('mimeTypes', $this->mimeTypesSrc->getMimeTypes());
-            }
-            $this->mimetypes = $this->cache->get('mimeTypes');
-        }
+        $this->mimetypes = $src->getMimeTypes();
     }
 
     /**

@@ -58,8 +58,6 @@ class MimeTypesTest extends TestCase
         $this->mimeTypesSrc = $this->createMock(MimeTypesSrcInterface::class);
         $this->mimeTypesSrc->method('getMimeTypes')->willReturn($this->mimeTypeArray);
 
-        $this->mimeTypesCache = $this->createMock(MimeTypesCacheInterface::class);
-
         $this->mimeTypes = new MimeTypes($this->mimeTypesSrc);
     }
 
@@ -70,20 +68,6 @@ class MimeTypesTest extends TestCase
     public function testConstructNoCache(): void
     {
         self::assertInstanceOf(MimeTypes::class, $this->mimeTypes);
-    }
-
-    /**
-     * @return void
-     * @covers MimeTypes::__construct
-     */
-    public function testConstructWithCache(): void
-    {
-        /**
-         * called once to see if the array is in the cache.  Called a second time to set the value of the mimeTypes property
-         */
-        $this->mimeTypesCache->expects($this->exactly(2))->method('get')->with('mimeTypes')->willReturn([]);
-        $this->mimeTypesCache->expects($this->once())->method('set')->with('mimeTypes', $this->mimeTypeArray, null);
-        $this->mimeTypes = new MimeTypes($this->mimeTypesSrc, $this->mimeTypesCache);
     }
 
     /**

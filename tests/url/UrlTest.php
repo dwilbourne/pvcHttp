@@ -13,14 +13,13 @@ use pvc\http\err\InvalidPortNumberException;
 use pvc\http\err\InvalidQuerystringException;
 use pvc\http\url\Url;
 use pvc\interfaces\http\QueryStringInterface;
-use pvc\interfaces\parser\ParserQueryStringInterface;
 
 class UrlTest extends TestCase
 {
 
     protected Url $url;
 
-    protected ParserQueryStringInterface $parserQueryString;
+    protected QueryStringInterface $queryString;
 
     protected array $testArray;
 
@@ -28,8 +27,9 @@ class UrlTest extends TestCase
 
     function setUp(): void
     {
-        $this->parserQueryString = $this->createMock(ParserQueryStringInterface::class);
-        $this->url = new Url($this->parserQueryString);
+        $this->queryString = $this->createMock(QueryStringInterface::class);
+        $this->queryString->method('render')->willReturn('axe=1&shovel=2');
+        $this->url = new Url($this->queryString);
 
         $this->testArray = array(
             'scheme' => 'https',
@@ -38,13 +38,13 @@ class UrlTest extends TestCase
             'user' => 'someuser',
             'password' => 'somepassword',
             'path' => 'ajax/libs/jquery/3.5.1/jquery.min.js',
-            'query' => 'axe=1&shovel=2',
+            'query' => $this->queryString,
             'fragment' => 'anchor'
         );
 
         $this->testResult = '';
         $this->testResult .= 'https://someuser:somepassword@ajax.googleapis.com:443';
-        $this->testResult .= '/ajax/libs/jquery/3.5.1/jquery.min.js?axe=1&shovel=2#anchor';
+        $this->testResult .= '/ajax/libs/jquery/3.5.1/jquery.min.js?' . $this->queryString->render() . '#anchor';
     }
 
     /**
@@ -54,18 +54,6 @@ class UrlTest extends TestCase
     public function testConstruct(): void
     {
         self::assertInstanceOf(Url::class, $this->url);
-    }
-
-    /**
-     * testSetGetParserQueryString
-     * @covers \pvc\http\url\Url::setParserQueryString()
-     * @covers \pvc\http\url\Url::getParserQueryString()
-     */
-    public function testSetGetParserQueryString(): void
-    {
-        $parser = $this->createMock(ParserQueryStringInterface::class);
-        $this->url->setParserQueryString($parser);
-        self::assertEquals($parser, $this->url->getParserQueryString());
     }
 
     /**
@@ -189,31 +177,12 @@ class UrlTest extends TestCase
 
     /**
      * testSetGetQuery
-     * @covers \pvc\http\url\Url::setQuery
-     * @covers \pvc\http\url\Url::getQuery
+     * @covers \pvc\http\url\Url::setQueryString
+     * @covers \pvc\http\url\Url::getQueryString
      */
-    public function testSetGetQuery(): void
+    public function testSetGetQueryString(): void
     {
-        $query = 'axe=1&shovel=2';
-        $parserReturnValue = true;
-        $this->setMockParserQueryString($query, $parserReturnValue);
-        $this->url->setQuery($query);
-        self::assertEquals($query, $this->url->getQuery());
-    }
-
-    /**
-     * testSetQueryThrowsExceptionWhenParserFails
-     * @throws InvalidQuerystringException
-     * @covers \pvc\http\url\Url::setQuery()
-     */
-    public function testSetQueryThrowsExceptionWhenParserFails(): void
-    {
-        $query = 'axe=1&shovel=2';
-        $queryStringObject = $this->createMock(QueryStringInterface::class);
-        $this->parserQueryString->setQueryString($queryStringObject);
-        $this->parserQueryString->expects($this->once())->method('parse')->with($query)->willReturn(false);
-        self::expectException(InvalidQuerystringException::class);
-        $this->url->setQuery($query);
+        self::assertEquals($this->queryString, $this->url->getQueryString());
     }
 
     /**
@@ -231,13 +200,15 @@ class UrlTest extends TestCase
     /**
      * testSetGetAttributesFromArray
      * @covers \pvc\http\url\Url::setAttributesFromArray
+     * @covers \pvc\http\url\Url::parseQueryString
      */
     public function testSetGetAttributesFromArray(): void
     {
-        $query = $this->testArray['query'];
-
-        $this->setMockParserQueryString($query);
-
+        /**
+         * for this method, the query key in this array should be a string of query parameters
+         */
+        $this->testArray['query'] = $this->queryString->render();
+        $this->queryString->expects($this->exactly(2))->method('addParam');
         $this->url->setAttributesFromArray($this->testArray);
         self::assertEquals($this->testArray['scheme'], $this->url->getScheme());
         self::assertEquals($this->testArray['host'], $this->url->getHost());
@@ -245,8 +216,35 @@ class UrlTest extends TestCase
         self::assertEquals($this->testArray['user'], $this->url->getUser());
         self::assertEquals($this->testArray['password'], $this->url->getPassword());
         self::assertEquals($this->testArray['path'], $this->url->getPath());
-        self::assertEquals($this->testArray['query'], $this->url->getQuery());
+        self::assertEquals($this->testArray['query'], $this->url->getQueryString()->render());
         self::assertEquals($this->testArray['fragment'], $this->url->getFragment());
+    }
+
+    /**
+     * @return void
+     * @throws InvalidQuerystringException
+     * @covers \pvc\http\url\Url::parseQueryString
+     */
+    public function testParseBadQueryString(): void
+    {
+        $badString = 'a=1=3';
+        $this->testArray['query'] = $badString;
+        self::expectException(InvalidQuerystringException::class);
+        $this->url->setAttributesFromArray($this->testArray);
+    }
+
+    /**
+     * @return void
+     * @throws CurlInitException
+     * @covers \pvc\http\url\Url::sendRequest
+     * @runInSeparateProcess
+     */
+    public function testSendRequestThrowsExceptionWhenCurlInitFails(): void
+    {
+        $this->expectException(CurlInitException::class);
+        uopz_set_return('curl_init', false);
+        $this->url->sendRequest();
+        uopz_unset_return('curl_init');
     }
 
     /**
@@ -255,10 +253,7 @@ class UrlTest extends TestCase
      */
     public function testGenerateUrlString(): void
     {
-        $query = $this->testArray['query'];
-
-        $this->setMockParserQueryString($query);
-
+        $this->testArray['query'] = $this->queryString->render();
         $this->url->setAttributesFromArray($this->testArray);
         $encoded = false;
         self::assertEquals($this->testResult, $this->url->generateURLString($encoded));
@@ -267,63 +262,49 @@ class UrlTest extends TestCase
     /**
      * testNotExist
      * @throws \pvc\http\err\CurlInitException
-     * @covers \pvc\http\url\Url::exists
+     * @covers \pvc\http\url\Url::sendRequest
      * @covers \pvc\http\url\Url::getCurlErrorMessage
      */
     public function testNotExist(): void
     {
         $this->url->setScheme('http');
+        /**
+         * unable to resolve the hostname causes curl_exec to fail
+         */
         $this->url->setHost('somebadhost');
-        $this->assertFalse($this->url->exists());
+        $this->assertEquals(-1, $this->url->sendRequest());
         self::assertNotEmpty($this->url->getCurlErrorMessage());
-    }
 
-    /**
-     * testMakeCurlInitFail
-     * @throws CurlInitException
-     * @covers \pvc\http\url\Url::exists
-     * @runInSeparateProcess
-     */
-    public function testThrowsExceptionWhenCurlInitReturnsFalse(): void
-    {
-        $this->url->setScheme('http');
-        $this->url->setHost('somebadhost');
-        uopz_set_return('curl_init', false);
-        self::expectException(CurlInitException::class);
-        $this->url->exists();
-        uopz_unset_return('curl_init');
-    }
-
-    /**
-     * testExists
-     * @throws \pvc\http\err\CurlInitException
-     * @covers \pvc\http\url\Url::exists
-     * @covers \pvc\http\url\Url::getHttpStatusCode
-     * @covers \pvc\http\url\Url::getHttpStatus
-     */
-    public function testExists(): void
-    {
-        $this->url->setScheme('http');
-        $this->url->setHost('www.google.com');
-        $this->assertTrue($this->url->exists());
-        self::assertEquals(200, $this->url->getHttpStatusCode());
-        $expectedStatus = 'OK';
-        self::assertEquals($expectedStatus, $this->url->getHttpStatus());
+        /**
+         * which is different from a 404 'page not found'
+         */
+        $this->url->setHost('google.com');
+        $this->url->setPath('/foobarbaz');
+        $this->assertEquals(404, $this->url->sendRequest());
         self::assertEmpty($this->url->getCurlErrorMessage());
     }
 
     /**
-     * setMockParserQueryString
-     * @param string $query
+     * testSendRequest
+     * @throws \pvc\http\err\CurlInitException
+     * @covers \pvc\http\url\Url::sendRequest
      */
-    protected function setMockParserQueryString(string $query): void
+    public function testSendRequest(): void
     {
-        $queryStringObject = $this->createMock(QueryStringInterface::class);
-        $this->parserQueryString->setQueryString($queryStringObject);
-        $this->parserQueryString->expects($this->once())->method('parse')->with($query)->willReturn(true);
-        $this->parserQueryString->expects($this->once())->method('getParsedValue')->willReturn($queryStringObject);
-        $queryStringObject->expects($this->once())->method('render')->willReturn($query);
+        $this->url->setScheme('http');
+        $this->url->setHost('www.google.com');
+        $expectedStatusCode = 200;
+        $this->assertEquals($expectedStatusCode, $this->url->sendRequest());
+        self::assertEmpty($this->url->getCurlErrorMessage());
     }
 
-
+    /**
+     * @return void
+     * @covers \pvc\http\url\Url::getHttpStatusFromCode
+     */
+    public function testGetStatusFromCode(): void
+    {
+        self::assertEquals('OK', $this->url->getHttpStatusFromCode(200));
+        self::assertNull($this->url->getHttpStatusFromCode(905));
+    }
 }
