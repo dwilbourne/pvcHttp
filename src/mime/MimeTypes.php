@@ -29,9 +29,9 @@ class MimeTypes implements MimeTypesInterface
     protected array $mimetypes;
 
     /**
-     * @param MimeTypesSrcInterface|MimeTypesCacheInterface $src
+     * @param MimeTypesSrcInterface|MimeTypesCacheInterface|null $src
      */
-    public function __construct(MimeTypesSrcInterface|MimeTypesCacheInterface $src = null)
+    public function __construct(MimeTypesSrcInterface|MimeTypesCacheInterface|null $src = null)
     {
         $src = $src ?: new MimeTypesSrcJsDelivr(new MimeTypeFactory());
         $this->mimetypes = $src->getMimeTypes();
