@@ -8,8 +8,6 @@ declare(strict_types=1);
 
 namespace pvc\http\mime;
 
-use pvc\err\pvc\file\FileDoesNotExistException;
-use pvc\err\pvc\file\FileNotReadableException;
 use pvc\http\err\ConflictingMimeTypesException;
 use pvc\http\err\InvalidMimeDetectionConstantException;
 use pvc\http\err\UnknownMimeTypeDetectedException;
@@ -17,6 +15,7 @@ use pvc\interfaces\http\mime\MimeTypeInterface;
 use pvc\interfaces\http\mime\MimeTypesCacheInterface;
 use pvc\interfaces\http\mime\MimeTypesInterface;
 use pvc\interfaces\http\mime\MimeTypesSrcInterface;
+use pvc\storage\filesys\File;
 
 /**
  * Class mimetype
@@ -96,12 +95,8 @@ class MimeTypes implements MimeTypesInterface
 
     public function detect(string $filePath, int $detectionMethods): MimeTypeInterface
     {
-        if (!file_exists($filePath)) {
-            throw new FileDoesNotExistException($filePath);
-        }
-        if (!is_readable($filePath)) {
-            throw new FileNotReadableException($filePath);
-        }
+        File::mustBeReadable($filePath);
+
         if (!$this->validateMimeTypeDetectionMethods($detectionMethods)) {
             throw new InvalidMimeDetectionConstantException();
         }

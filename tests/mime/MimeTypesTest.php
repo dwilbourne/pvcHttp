@@ -9,8 +9,6 @@ namespace pvcTests\http\mime;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use pvc\err\pvc\file\FileDoesNotExistException;
-use pvc\err\pvc\file\FileNotReadableException;
 use pvc\http\err\ConflictingMimeTypesException;
 use pvc\http\err\InvalidMimeDetectionConstantException;
 use pvc\http\err\UnknownMimeTypeDetectedException;
@@ -127,46 +125,6 @@ class MimeTypesTest extends TestCase
 
     /**
      * @return void
-     * @throws FileDoesNotExistException
-     * @throws \pvc\err\pvc\file\FileNotReadableException
-     * @throws \pvc\http\err\ConflictingMimeTypesException
-     * @throws \pvc\http\err\InvalidMimeDetectionConstantException
-     * @covers \pvc\http\mime\MimeTypes::detect
-     */
-    public function testDetectThrowsExceptionWithNonExistentFile(): void
-    {
-        $nonExistentFile = 'non_existent_file';
-        $detectionMethod = MimeTypes::DETECT_FROM_CONTENTS;
-        self::expectException(FileDoesNotExistException::class);
-        $this->mimeTypes->detect($nonExistentFile, $detectionMethod);
-    }
-
-    /**
-     * @return void
-     * @throws FileDoesNotExistException
-     * @throws FileNotReadableException
-     * @throws \pvc\http\err\ConflictingMimeTypesException
-     * @throws \pvc\http\err\InvalidMimeDetectionConstantException
-     * @covers \pvc\http\mime\MimeTypes::detect
-     */
-    public function testDetectThrowsExceptionIfFileIsNotReadable(): void
-    {
-        $unreadableFile = $this->fixturesDirectory . '/' . 'unreadable_file.php';
-        /**
-         * no permissions to the file for group and world.
-         * chmod($unreadableFile, 0600);
-         * developing on Windows, permissions to this file removed manually
-         */
-
-        $detectionMethod = MimeTypes::DETECT_FROM_CONTENTS;
-        self::expectException(FileNotReadableException::class);
-        $this->mimeTypes->detect($unreadableFile, $detectionMethod);
-    }
-
-    /**
-     * @return void
-     * @throws FileDoesNotExistException
-     * @throws FileNotReadableException
      * @throws InvalidMimeDetectionConstantException
      * @throws \pvc\http\err\ConflictingMimeTypesException
      * @covers \pvc\http\mime\MimeTypes::detect
@@ -183,8 +141,6 @@ class MimeTypesTest extends TestCase
     /**
      * @return void
      * @throws ConflictingMimeTypesException
-     * @throws FileDoesNotExistException
-     * @throws FileNotReadableException
      * @throws InvalidMimeDetectionConstantException
      * @covers \pvc\http\mime\MimeTypes::detect
      * @runInSeparateProcess
@@ -202,8 +158,6 @@ class MimeTypesTest extends TestCase
     /**
      * @return void
      * @throws ConflictingMimeTypesException
-     * @throws FileDoesNotExistException
-     * @throws FileNotReadableException
      * @throws InvalidMimeDetectionConstantException
      * @throws UnknownMimeTypeDetectedException
      * @covers \pvc\http\mime\MimeTypes::detect
@@ -226,8 +180,6 @@ class MimeTypesTest extends TestCase
     /**
      * @return void
      * @throws ConflictingMimeTypesException
-     * @throws FileDoesNotExistException
-     * @throws FileNotReadableException
      * @throws InvalidMimeDetectionConstantException
      * @covers \pvc\http\mime\MimeTypes::detect
      */

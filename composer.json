@@ -27,7 +27,8 @@
 		"psr/simple-cache": "*",
 		"pvc/interfaces": "*",
 		"pvc/err": "*",
-		"pvc/parser": "*"
+		"pvc/parser": "*",
+		"pvc/storage": "*"
     },
 	"require-dev": {
 		"phpunit/phpunit": "^9",
