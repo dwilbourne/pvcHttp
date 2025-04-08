@@ -9,13 +9,13 @@ namespace pvcTests\http\mime;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use pvc\http\err\ConflictingMimeTypesException;
-use pvc\http\err\InvalidMimeDetectionConstantException;
 use pvc\http\err\UnknownMimeTypeDetectedException;
+use pvc\http\err\UrlMustBeReadableException;
 use pvc\http\mime\MimeTypes;
 use pvc\interfaces\http\mime\MimeTypeInterface;
 use pvc\interfaces\http\mime\MimeTypesCacheInterface;
 use pvc\interfaces\http\mime\MimeTypesSrcInterface;
+use pvc\interfaces\http\UrlInterface;
 
 class MimeTypesTest extends TestCase
 {
@@ -125,80 +125,62 @@ class MimeTypesTest extends TestCase
 
     /**
      * @return void
-     * @throws InvalidMimeDetectionConstantException
-     * @throws \pvc\http\err\ConflictingMimeTypesException
-     * @covers \pvc\http\mime\MimeTypes::detect
-     * @covers \pvc\http\mime\MimeTypes::validateMimeTypeDetectionMethods
-     */
-    public function testDetectThrowsExceptionWithBadDetectionMethod(): void
-    {
-        $testFile = $this->fixturesDirectory . '/' . 'jpeg_with_correct_extension.jpg';
-        $detectionMethod = 0;
-        self::expectException(InvalidMimeDetectionConstantException::class);
-        $this->mimeTypes->detect($testFile, $detectionMethod);
-    }
-
-    /**
-     * @return void
-     * @throws ConflictingMimeTypesException
-     * @throws InvalidMimeDetectionConstantException
-     * @covers \pvc\http\mime\MimeTypes::detect
-     * @runInSeparateProcess
-     */
-    public function testDetectThrowsExceptionWhenContentsAndFileExtensionConflict(): void
-    {
-        $testFile = $this->fixturesDirectory . '/' . 'jpeg_with_correct_extension.jpg';
-        $detectionMethod = MimeTypes::DETECT_FROM_CONTENTS | MimeTypes::USE_FILE_EXTENSION;
-        self::expectException(ConflictingMimeTypesException::class);
-        uopz_set_return('mime_content_type', 'application/javascript');
-        $this->mimeTypes->detect($testFile, $detectionMethod);
-        uopz_unset_return('mime_content_type');
-    }
-
-    /**
-     * @return void
-     * @throws ConflictingMimeTypesException
-     * @throws InvalidMimeDetectionConstantException
-     * @throws UnknownMimeTypeDetectedException
-     * @covers \pvc\http\mime\MimeTypes::detect
-     * @runInSeparateProcess
-     */
-    public function testDetectThrowsExceptionWithUnknownMimeType(): void
-    {
-        $testFile = $this->fixturesDirectory . '/' . 'jpeg_with_correct_extension.jpg';
-        $detectionMethod = MimeTypes::DETECT_FROM_CONTENTS;
-        self::expectException(UnknownMimeTypeDetectedException::class);
-        /**
-         * the mime types array is mocked, so 'image.tif', although valid in real life, is not 'known' in the mock
-         * environment
-         */
-        uopz_set_return('mime_content_type', 'image/tif');
-        $this->mimeTypes->detect($testFile, $detectionMethod);
-        uopz_unset_return('mime_content_type');
-    }
-
-    /**
-     * @return void
-     * @throws ConflictingMimeTypesException
-     * @throws InvalidMimeDetectionConstantException
      * @covers \pvc\http\mime\MimeTypes::detect
      */
     public function testDetectSucceeds(): void
     {
         $testFile = $this->fixturesDirectory . '/' . 'jpeg_with_correct_extension.jpg';
+
+        $url = $this->createMock(UrlInterface::class);
+        $url->method('render')->willReturn($testFile);
+
         $fileExtension = pathinfo($testFile, PATHINFO_EXTENSION);
         $expectedMimeTypeString = $this->mimeTypes->getMimeTypeNameFromFileExtension($fileExtension);
 
-        $detectionMethod = MimeTypes::DETECT_FROM_CONTENTS;
-        $actualMimeTypeString = $this->mimeTypes->detect($testFile, $detectionMethod)->getMimeTypeName();
+        $actualMimeTypeString = $this->mimeTypes->detect($url)->getMimeTypeName();
         self::assertEquals($expectedMimeTypeString, $actualMimeTypeString);
+    }
 
-        $detectionMethod = MimeTypes::USE_FILE_EXTENSION;
-        $actualMimeTypeString = $this->mimeTypes->detect($testFile, $detectionMethod)->getMimeTypeName();
-        self::assertEquals($expectedMimeTypeString, $actualMimeTypeString);
+    /**
+     * @return void
+     * @throws UrlMustBeReadableException
+     * @throws \pvc\http\err\UnknownMimeTypeDetectedException
+     * @covers \pvc\http\mime\MimeTypes::detect
+     *
+     * cannot mock a static method call so we have to use uopz to change the behaviors
+     */
+    public function testDetectFailsIfUrlIsNotReadable(): void
+    {
+        $url = $this->createMock(UrlInterface::class);
+        uopz_set_return('fopen', false);
+        self::expectException(UrlMustBeReadableException::class);
+        $actualMimeTypeString = $this->mimeTypes->detect($url)->getMimeTypeName();
+        unset($actualMimeTypeString);
+        uopz_unset_return('fopen');
+    }
 
-        $detectionMethod = MimeTypes::DETECT_FROM_CONTENTS | MimeTypes::USE_FILE_EXTENSION;
-        $actualMimeTypeString = $this->mimeTypes->detect($testFile, $detectionMethod)->getMimeTypeName();
-        self::assertEquals($expectedMimeTypeString, $actualMimeTypeString);
+    /**
+     * @return void
+     * @covers \pvc\http\mime\MimeTypes::detect
+     * @runInSeparateProcess
+     */
+    public function testDetectFailsIfMimeTypeIsUnknown(): void
+    {
+        /**
+         * no idea how to mock a file handle - use a real one
+         */
+        $testFile = $this->fixturesDirectory . '/' . 'jpeg_with_correct_extension.jpg';
+        $url = $this->createMock(UrlInterface::class);
+        $url->method('render')->willReturn($testFile);
+
+        $unknownMimeType = 'bar';
+        uopz_set_return('mime_content_type', $unknownMimeType);
+
+        self::expectException(UnknownMimeTypeDetectedException::class);
+        $actualMimeTypeString = $this->mimeTypes->detect($url)->getMimeTypeName();
+
+        uopz_unset_return('mime_content_type');
+
+        unset($actualMimeTypeString);
     }
 }

@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace pvcTests\http\url;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use pvc\http\err\InvalidQueryEncodingException;
 use pvc\http\err\InvalidQuerystringException;
@@ -16,7 +17,10 @@ use pvc\interfaces\validator\ValTesterInterface;
 
 class QueryStringTest extends TestCase
 {
-    protected ValTesterInterface $tester;
+    /**
+     * @var ValTesterInterface<string>|MockObject
+     */
+    protected ValTesterInterface|MockObject $tester;
     protected QueryString $qstrObject;
 
     public function setUp(): void
@@ -48,7 +52,7 @@ class QueryStringTest extends TestCase
     /**
      * testAddParamThrowExceptionWithInvalidParamName
      * @throws InvalidQuerystringParamNameException
-     * @covers \pvc\http\url\QueryString::addParam
+     * @covers \pvc\http\url\QueryString::setParam
      */
     public function testAddParamThrowExceptionWithInvalidParamName(): void
     {
@@ -57,27 +61,27 @@ class QueryStringTest extends TestCase
         $paramName = 'sum_2';
         $paramValue = '3';
         $this->expectException(InvalidQuerystringParamNameException::class);
-        $this->qstrObject->addParam($paramName, $paramValue);
+        $this->qstrObject->setParam($paramName, $paramValue);
     }
 
     /**
      * @return void
      * @throws InvalidQuerystringException
      * @throws InvalidQuerystringParamNameException
-     * @covers \pvc\http\url\QueryString::addParam
+     * @covers \pvc\http\url\QueryString::setParam
      */
     public function testAddParamThrowsExceptionWithEmptyParamName(): void
     {
         $paramName = '';
         $paramValue = '3';
         $this->expectException(InvalidQuerystringException::class);
-        $this->qstrObject->addParam($paramName, $paramValue);
+        $this->qstrObject->setParam($paramName, $paramValue);
     }
 
     /**
      * testAddParam
      * @throws \pvc\http\err\InvalidQuerystringParamNameException
-     * @covers \pvc\http\url\QueryString::addParam
+     * @covers \pvc\http\url\QueryString::setParam
      */
     public function testAddParam(): void
     {
@@ -86,7 +90,7 @@ class QueryStringTest extends TestCase
         $paramName = 'sum_2';
         $paramValue = '3';
         $expectedResult = [$paramName => $paramValue];
-        $this->qstrObject->addParam($paramName, $paramValue);
+        $this->qstrObject->setParam($paramName, $paramValue);
         self::assertEqualsCanonicalizing($expectedResult, $this->qstrObject->getParams());
     }
 

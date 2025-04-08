@@ -7,44 +7,65 @@ declare(strict_types=1);
 
 namespace pvcTests\http\url;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use pvc\http\err\CurlInitException;
-use pvc\http\err\InvalidPortNumberException;
-use pvc\http\err\InvalidQuerystringException;
+use pvc\http\err\InvalidUrlException;
 use pvc\http\url\Url;
 use pvc\interfaces\http\QueryStringInterface;
+use pvc\interfaces\parser\ParserQueryStringInterface;
+use pvc\interfaces\validator\ValTesterInterface;
 
+/**
+ * @phpstan-import-type UrlShape from Url
+ */
 class UrlTest extends TestCase
 {
 
     protected Url $url;
 
-    protected QueryStringInterface $queryString;
+    protected ParserQueryStringInterface $queryStringParser;
 
+    protected QueryStringInterface|MockObject $queryString;
+
+    /**
+     * @var  ValTesterInterface<string>|MockObject
+     */
+    protected ValTesterInterface|MockObject $urlTester;
+
+    /**
+     * @var UrlShape
+     */
     protected array $testArray;
 
-    protected string $testResult;
+    protected string $testUrlString;
 
     function setUp(): void
     {
         $this->queryString = $this->createMock(QueryStringInterface::class);
         $this->queryString->method('render')->willReturn('axe=1&shovel=2');
-        $this->url = new Url($this->queryString);
 
+        $this->queryStringParser = $this->createMock(ParserQueryStringInterface::class);
+        $this->queryStringParser->method('getParsedValue')->willReturn($this->queryString);
+        $this->urlTester = $this->createMock(ValTesterInterface::class);
+        $this->url = new Url($this->queryStringParser, $this->urlTester);
+
+        /**
+         * @var UrlShape
+         */
         $this->testArray = array(
             'scheme' => 'https',
             'host' => 'ajax.googleapis.com',
             'port' => '443',
             'user' => 'someuser',
             'password' => 'somepassword',
-            'path' => 'ajax/libs/jquery/3.5.1/jquery.min.js',
-            'query' => $this->queryString,
+            'path' => '/ajax/libs/jquery/3.5.1/jquery.min.js',
+            'query' => $this->queryString->render(),
             'fragment' => 'anchor'
         );
 
-        $this->testResult = '';
-        $this->testResult .= 'https://someuser:somepassword@ajax.googleapis.com:443';
-        $this->testResult .= '/ajax/libs/jquery/3.5.1/jquery.min.js?' . $this->queryString->render() . '#anchor';
+        $this->testUrlString = '';
+        $this->testUrlString .= 'https://someuser:somepassword@ajax.googleapis.com:443';
+        $this->testUrlString .= '/ajax/libs/jquery/3.5.1/jquery.min.js?' . $this->queryString->render() . '#anchor';
     }
 
     /**
@@ -57,127 +78,7 @@ class UrlTest extends TestCase
     }
 
     /**
-     * testSetGetScheme
-     * @covers \pvc\http\url\Url::setScheme
-     * @covers \pvc\http\url\Url::getScheme
-     */
-    public function testSetGetScheme(): void
-    {
-        $scheme = 'ftp';
-        $this->url->setScheme($scheme);
-        self::assertEquals($scheme, $this->url->getScheme());
-    }
-
-    /**
-     * testSetGetHost
-     * @covers \pvc\http\url\Url::setHost
-     * @covers \pvc\http\url\Url::getHost
-     */
-    public function testSetGetHost(): void
-    {
-        $host = 'google.com';
-        $this->url->setHost($host);
-        self::assertEquals($host, $this->url->getHost());
-    }
-
-    /**
-     * testSetPortThrowsExceptionWithBadPortNumber
-     * @throws InvalidPortNumberException
-     * @covers \pvc\http\url\Url::setPort
-     */
-    public function testSetPortThrowsExceptionWithBadPortNumber(): void
-    {
-        $badPortNumber = '12hj';
-        self::expectException(InvalidPortNumberException::class);
-        $this->url->setPort($badPortNumber);
-    }
-
-    /**
-     * testSetGetPort
-     * @covers \pvc\http\url\Url::setPort
-     * @covers \pvc\http\url\Url::getPort
-     */
-    public function testSetGetPort(): void
-    {
-        $port = '443';
-        $this->url->setPort($port);
-        self::assertEquals($port, $this->url->getPort());
-    }
-
-    /**
-     * testSetGetUser
-     * @covers \pvc\http\url\Url::setUser
-     * @covers \pvc\http\url\Url::getUser
-     */
-    public function testSetGetUser(): void
-    {
-        $user = 'someuser';
-        $this->url->setUser($user);
-        self::assertEquals($user, $this->url->getUser());
-    }
-
-    /**
-     * testSetGetPassword
-     * @covers \pvc\http\url\Url::setPassword
-     * @covers \pvc\http\url\Url::getPassword
-     */
-    public function testSetGetPassword(): void
-    {
-        $password = 'somepassword';
-        $this->url->setPassword($password);
-        self::assertEquals($password, $this->url->getPassword());
-    }
-
-    /**
-     * testSetGetPath
-     * @covers \pvc\http\url\Url::setPath
-     * @covers \pvc\http\url\Url::getPath
-     */
-    public function testSetGetPath(): void
-    {
-        $path = "/path/to/some/resource";
-        $this->url->setPath($path);
-        self::assertEquals($path, $this->url->getPath());
-    }
-
-    /**
-     * testSetGetEmptyPath
-     * @covers \pvc\http\url\Url::setPath
-     * @covers \pvc\http\url\Url::getPath
-     */
-    public function testSetGetEmptyPath(): void
-    {
-        $path = '';
-        $this->url->setPath($path);
-        self::assertEquals('', $this->url->getPath());
-    }
-
-    /**
-     * testSetGetPathAsArray
-     * @covers \pvc\http\url\Url::getPathAsArray
-     */
-    public function testSetGetPathAsArray(): void
-    {
-        $path = "path/to/some/resource";
-        $this->url->setPath($path);
-        $expectedResult = ['path', 'to', 'some', 'resource'];
-        self::assertEquals($expectedResult, $this->url->getPathAsArray());
-    }
-
-    /**
-     * testSetGetPathAsString
-     * @covers \pvc\http\url\Url::getPath
-     */
-    public function testSetGetPathAsString(): void
-    {
-        $path = "path/to/some/resource";
-        $this->url->setPath($path);
-        self::assertEquals($path, $this->url->getPath());
-    }
-
-    /**
      * testSetGetQuery
-     * @covers \pvc\http\url\Url::setQueryString
      * @covers \pvc\http\url\Url::getQueryString
      */
     public function testSetGetQueryString(): void
@@ -186,125 +87,41 @@ class UrlTest extends TestCase
     }
 
     /**
-     * testSetGetFragment
-     * @covers \pvc\http\url\Url::setFragment
-     * @covers \pvc\http\url\Url::getFragment
+     * testHydrate
+     * @covers \pvc\http\url\Url::hydrateFromArray
      */
-    public function testSetGetFragment(): void
+    public function testHydrateFromArray(): void
     {
-        $fragment = "anchor";
-        $this->url->setFragment($fragment);
-        self::assertEquals($fragment, $this->url->getFragment());
-    }
+        $this->urlTester->method('testValue')->willReturn(true);
+        $this->url->hydrateFromArray($this->testArray);
 
-    /**
-     * testSetGetAttributesFromArray
-     * @covers \pvc\http\url\Url::setAttributesFromArray
-     * @covers \pvc\http\url\Url::parseQueryString
-     */
-    public function testSetGetAttributesFromArray(): void
-    {
-        /**
-         * for this method, the query key in this array should be a string of query parameters
-         */
-        $this->testArray['query'] = $this->queryString->render();
-        $this->queryString->expects($this->exactly(2))->method('addParam');
-        $this->url->setAttributesFromArray($this->testArray);
-        self::assertEquals($this->testArray['scheme'], $this->url->getScheme());
-        self::assertEquals($this->testArray['host'], $this->url->getHost());
-        self::assertEquals($this->testArray['port'], $this->url->getPort());
-        self::assertEquals($this->testArray['user'], $this->url->getUser());
-        self::assertEquals($this->testArray['password'], $this->url->getPassword());
-        self::assertEquals($this->testArray['path'], $this->url->getPath());
+        self::assertEquals($this->testArray['scheme'], $this->url->scheme);
+        self::assertEquals($this->testArray['host'], $this->url->host);
+        self::assertEquals($this->testArray['port'], $this->url->port);
+        self::assertEquals($this->testArray['user'], $this->url->user);
+        self::assertEquals($this->testArray['password'], $this->url->password);
+        self::assertEquals($this->testArray['path'], $this->url->path);
         self::assertEquals($this->testArray['query'], $this->url->getQueryString()->render());
-        self::assertEquals($this->testArray['fragment'], $this->url->getFragment());
+        self::assertEquals($this->testArray['fragment'], $this->url->fragment);
     }
 
     /**
      * @return void
-     * @throws InvalidQuerystringException
-     * @covers \pvc\http\url\Url::parseQueryString
+     * @throws \pvc\http\err\InvalidUrlException
+     * @covers \pvc\http\url\Url::render
      */
-    public function testParseBadQueryString(): void
+    public function testRender(): void
     {
-        $badString = 'a=1=3';
-        $this->testArray['query'] = $badString;
-        self::expectException(InvalidQuerystringException::class);
-        $this->url->setAttributesFromArray($this->testArray);
+        $this->urlTester->method('testValue')->willReturn(true);
+        $this->url->hydrateFromArray($this->testArray);
+        $expectedResult = $this->testUrlString;
+        self::assertEquals($expectedResult, $this->url->render());
     }
 
-    /**
-     * @return void
-     * @throws CurlInitException
-     * @covers \pvc\http\url\Url::sendRequest
-     * @runInSeparateProcess
-     */
-    public function testSendRequestThrowsExceptionWhenCurlInitFails(): void
+    public function testBadUrlCannotBerenderedByDefault(): void
     {
-        $this->expectException(CurlInitException::class);
-        uopz_set_return('curl_init', false);
-        $this->url->sendRequest();
-        uopz_unset_return('curl_init');
-    }
-
-    /**
-     * testGenerateUrlString
-     * @covers \pvc\http\url\Url::generateURLString
-     */
-    public function testGenerateUrlString(): void
-    {
-        $this->testArray['query'] = $this->queryString->render();
-        $this->url->setAttributesFromArray($this->testArray);
-        $encoded = false;
-        self::assertEquals($this->testResult, $this->url->generateURLString($encoded));
-    }
-
-    /**
-     * testNotExist
-     * @throws \pvc\http\err\CurlInitException
-     * @covers \pvc\http\url\Url::sendRequest
-     * @covers \pvc\http\url\Url::getCurlErrorMessage
-     */
-    public function testNotExist(): void
-    {
-        $this->url->setScheme('http');
-        /**
-         * unable to resolve the hostname causes curl_exec to fail
-         */
-        $this->url->setHost('somebadhost');
-        $this->assertEquals(-1, $this->url->sendRequest());
-        self::assertNotEmpty($this->url->getCurlErrorMessage());
-
-        /**
-         * which is different from a 404 'page not found'
-         */
-        $this->url->setHost('google.com');
-        $this->url->setPath('/foobarbaz');
-        $this->assertEquals(404, $this->url->sendRequest());
-        self::assertEmpty($this->url->getCurlErrorMessage());
-    }
-
-    /**
-     * testSendRequest
-     * @throws \pvc\http\err\CurlInitException
-     * @covers \pvc\http\url\Url::sendRequest
-     */
-    public function testSendRequest(): void
-    {
-        $this->url->setScheme('http');
-        $this->url->setHost('www.google.com');
-        $expectedStatusCode = 200;
-        $this->assertEquals($expectedStatusCode, $this->url->sendRequest());
-        self::assertEmpty($this->url->getCurlErrorMessage());
-    }
-
-    /**
-     * @return void
-     * @covers \pvc\http\url\Url::getHttpStatusFromCode
-     */
-    public function testGetStatusFromCode(): void
-    {
-        self::assertEquals('OK', $this->url->getHttpStatusFromCode(200));
-        self::assertNull($this->url->getHttpStatusFromCode(905));
+        $this->url->fragment = 'someFragment';
+        self::expectException(InvalidUrlException::class);
+        $this->url->render();
     }
 }

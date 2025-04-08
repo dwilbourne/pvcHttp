@@ -4,6 +4,7 @@ namespace pvc\http\err;
 
 use pvc\err\stock\LogicException;
 
-class InvalidMimeDetectionConstantException extends LogicException
+class DetectMimeTypeResourceException extends LogicException
 {
+
 }

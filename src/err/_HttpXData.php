@@ -26,9 +26,15 @@ class _HttpXData extends XDataAbstract
             InvalidQuerystringException::class => 1004,
             MimeTypeCdnException::class => 1005,
             MimeTypesJsonDecodingException::class => 1006,
-            InvalidMimeDetectionConstantException::class => 1007,
-            ConflictingMimeTypesException::class => 1008,
+            UrlMustBeReadableException::class => 1007,
             UnknownMimeTypeDetectedException::class => 1009,
+            ClientRuntimeException::class => 1010,
+            InvalidUrlException::class => 1012,
+            DetectMimeTypeResourceException::class => 1014,
+            InvalidResourceException::class => 1015,
+            InvalidStreamHandleException::class => 1016,
+            InvalidHttpVerbException::class => 1017,
+            InvalidConnectionTimeoutException::class => 1018,
         ];
     }
 
@@ -42,9 +48,15 @@ class _HttpXData extends XDataAbstract
             InvalidQuerystringException::class => 'Invalid querystring.',
             MimeTypeCdnException::class => 'runtime exception: cdn ${cdn} containing mime types in not currently available.',
             MimeTypesJsonDecodingException::class => 'Error decoding json string into MimeTypes object.',
-            InvalidMimeDetectionConstantException::class => 'Invalid MimeType class constant used as parameter to setMimeTypeDetection',
-            ConflictingMimeTypesException::class => 'Mime type detected from file ${filePath} and file extension do not agree.',
+            UrlMustBeReadableException::class => 'Unable to open ${url} for reading.',
             UnknownMimeTypeDetectedException::class => 'Unknown mime type ${mimeType} detected from php function mime_content_type in file ${filePath}.',
+            InvalidUrlException::class => 'Invalid url ${badUrl} could not be parsed.',
+            ClientRuntimeException::class => 'Unable to connect to ${url}.',
+            InvalidConnectionTimeoutException::class => 'Invalid connection timeout ${badTimeout} - must be > 0.',
+            DetectMimeTypeResourceException::class => 'First arrgument to detect method must be either a filename or a resource (e.g. stream)',
+            InvalidResourceException::class => 'Invalid resource: either is not a resource or resource has already been closed.',
+            InvalidStreamHandleException::class => 'Resource is not a handle to a stream resource.',
+            InvalidHttpVerbException::class => 'Invalid HTTP verb ${badHttpVerb} provided.',
         ];
     }
 }

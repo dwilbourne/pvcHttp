@@ -15,7 +15,11 @@ use pvc\interfaces\validator\ValTesterInterface;
 /**
  * Class QueryString
  *
- * Encapsulate the idea of a querystring.
+ * The purpose of the class is to provide an easy way to manipulate querystring parameters and values without
+ * having to do any string manipulation.  Once the parameter names and corresponding values are configured, this
+ * object outputs an actual querystring.  You can build a querystring from scratch with this object.  You can
+ * also hydrate this object with an existing querystring using the ParserQueryString object in the pvc Parser
+ * library.
  */
 class QueryString implements QueryStringInterface
 {
@@ -74,7 +78,7 @@ class QueryString implements QueryStringInterface
     public function setParams(array $params) : void
     {
         foreach ($params as $key => $value) {
-            $this->addParam($key, $value);
+            $this->setParam($key, $value);
         }
     }
 
@@ -86,9 +90,8 @@ class QueryString implements QueryStringInterface
      * @throws InvalidQuerystringParamNameException
      *
      * will overwrite duplicate parameter names
-     *
      */
-    public function addParam(string $varName, string $value): void
+    public function setParam(string $varName, string $value): void
     {
         if (empty($varName)) {
             throw new InvalidQuerystringException();
@@ -143,6 +146,10 @@ class QueryString implements QueryStringInterface
      *
      * The method does not prepend the querystring with a '?'.  The '?' is a delimiter in the URL, not really part of
      * the querystring per se.  The '?' is inserted when the URL is rendered.
+     *
+     *  urlencode / urldecode translate the percent-encoded bits as well as plus signs.  rawurlencode
+     *  and rawurldecode do not translate plus signs, and are designed to be compliant with RFC 3986, which specifies
+     *  the syntaxes for URI's, URN's and URL's.
      */
     public function render(): string
     {

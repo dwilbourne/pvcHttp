@@ -8,14 +8,15 @@ declare(strict_types=1);
 
 namespace pvc\http\mime;
 
-use pvc\http\err\ConflictingMimeTypesException;
-use pvc\http\err\InvalidMimeDetectionConstantException;
 use pvc\http\err\UnknownMimeTypeDetectedException;
+use pvc\http\err\UrlMustBeReadableException;
+use pvc\http\Stream;
 use pvc\interfaces\http\mime\MimeTypeInterface;
 use pvc\interfaces\http\mime\MimeTypesCacheInterface;
 use pvc\interfaces\http\mime\MimeTypesInterface;
 use pvc\interfaces\http\mime\MimeTypesSrcInterface;
-use pvc\storage\filesys\File;
+use pvc\interfaces\http\UrlInterface;
+use Throwable;
 
 /**
  * Class mimetype
@@ -27,10 +28,13 @@ class MimeTypes implements MimeTypesInterface
      */
     protected array $mimetypes;
 
+
     /**
      * @param MimeTypesSrcInterface|MimeTypesCacheInterface|null $src
      */
-    public function __construct(MimeTypesSrcInterface|MimeTypesCacheInterface|null $src = null)
+    public function __construct(
+        MimeTypesSrcInterface|MimeTypesCacheInterface|null $src = null,
+    )
     {
         $src = $src ?: new MimeTypesSrcJsDelivr(new MimeTypeFactory());
         $this->mimetypes = $src->getMimeTypes();
@@ -88,45 +92,33 @@ class MimeTypes implements MimeTypesInterface
         return false;
     }
 
-    private function validateMimeTypeDetectionMethods(int $detectionMethods): bool
+    /**
+     * @param UrlInterface $url
+     * @return MimeTypeInterface
+     * @throws UrlMustBeReadableException
+     * @throws UnknownMimeTypeDetectedException
+     */
+    public function detect(UrlInterface $url): MimeTypeInterface
     {
-        return (($detectionMethods & self::DETECT_FROM_CONTENTS) || ($detectionMethods & self::USE_FILE_EXTENSION));
-    }
-
-    public function detect(string $filePath, int $detectionMethods): MimeTypeInterface
-    {
-        File::mustBeReadable($filePath);
-
-        if (!$this->validateMimeTypeDetectionMethods($detectionMethods)) {
-            throw new InvalidMimeDetectionConstantException();
+        /**
+         * ensure the url is syntactically valid and we can open it for reading
+         */
+        try {
+            $handle = Stream::openForReading($url);
+        } catch (Throwable $e) {
+            throw new UrlMustBeReadableException($url->render(), $e);
         }
-        if ($detectionMethods & self::DETECT_FROM_CONTENTS) {
-            /**
-             * mime_content_type can return false if it is unable to detect the mime type.  Less likely, it could
-             * conceivably return a mime type that is unknown in the list of mime types supplied by the cdn that
-             * this library is using
-             */
-            $detected = mime_content_type($filePath) ?: '';
-            if (!$contentMimeType = $this->getMimeType($detected)) {
-                throw new UnknownMimeTypeDetectedException($detected, $filePath);
-            }
-        } else {
-            $contentMimeType = null;
-        }
+        $detected = mime_content_type($handle) ?: 'unknown';
+        Stream::close($handle);
 
-        if ($detectionMethods & self::USE_FILE_EXTENSION) {
-            $mimeTypeName = $this->getMimeTypeNameFromFileExtension(pathinfo($filePath, PATHINFO_EXTENSION)) ?: '';
-            $fileExtensionMimeType = $this->getMimeType($mimeTypeName);
-        } else {
-            $fileExtensionMimeType = null;
+        /**
+         * mime_content_type can return false if it is unable to detect the mime type.  Less likely, it could
+         * conceivably return a mime type that is unknown in the list of mime types supplied by the cdn that
+         * this library is using
+         */
+        if (!$contentMimeType = $this->getMimeType($detected)) {
+            throw new UnknownMimeTypeDetectedException($detected, $url->render());
         }
-
-        if (($contentMimeType && $fileExtensionMimeType) && $contentMimeType !== $fileExtensionMimeType) {
-            throw new ConflictingMimeTypesException($filePath);
-        }
-
-        $result = $contentMimeType ?: $fileExtensionMimeType;
-        assert($result instanceof MimeTypeInterface);
-        return $result;
+        return $contentMimeType;
     }
 }
