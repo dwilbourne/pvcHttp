@@ -32,7 +32,7 @@ class _HttpXDataTest extends XDataTestMaster
      * @covers \pvc\http\err\ClientRuntimeException
      * @covers \pvc\http\err\InvalidHttpVerbException
      * @covers \pvc\http\err\InvalidConnectionTimeoutException
-     * @covers \pvc\http\err\UrlMustBeReadableException
+     * @covers \pvc\http\err\MimeTypesUnreadableStreamException
      */
     public function testHttpXData(): void
     {

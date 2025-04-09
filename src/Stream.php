@@ -4,7 +4,7 @@ namespace pvc\http;
 
 use pvc\http\err\InvalidResourceException;
 use pvc\http\err\InvalidStreamHandleException;
-use pvc\http\err\UrlMustBeReadableException;
+use pvc\http\err\MimeTypesUnreadableStreamException;
 use pvc\interfaces\http\UrlInterface;
 
 class Stream
@@ -12,14 +12,14 @@ class Stream
     /**
      * @param UrlInterface $url
      * @return resource
-     * @throws UrlMustBeReadableException
+     * @throws MimeTypesUnreadableStreamException
      */
     public static function openForReading(UrlInterface $url)
     {
         $urlString = $url->render();
 
         if (!$handle = fopen($urlString, 'r')) {
-            throw new UrlMustBeReadableException($urlString);
+            throw new MimeTypesUnreadableStreamException($urlString);
         }
         return $handle;
     }

@@ -8,14 +8,12 @@ declare(strict_types=1);
 
 namespace pvc\http\mime;
 
+use pvc\http\err\MimeTypesUnreadableStreamException;
 use pvc\http\err\UnknownMimeTypeDetectedException;
-use pvc\http\err\UrlMustBeReadableException;
-use pvc\http\Stream;
 use pvc\interfaces\http\mime\MimeTypeInterface;
 use pvc\interfaces\http\mime\MimeTypesCacheInterface;
 use pvc\interfaces\http\mime\MimeTypesInterface;
 use pvc\interfaces\http\mime\MimeTypesSrcInterface;
-use pvc\interfaces\http\UrlInterface;
 use Throwable;
 
 /**
@@ -93,31 +91,28 @@ class MimeTypes implements MimeTypesInterface
     }
 
     /**
-     * @param UrlInterface $url
+     * @param resource $stream
      * @return MimeTypeInterface
-     * @throws UrlMustBeReadableException
+     * @throws MimeTypesUnreadableStreamException
      * @throws UnknownMimeTypeDetectedException
      */
-    public function detect(UrlInterface $url): MimeTypeInterface
+    public function detect($stream): MimeTypeInterface
     {
         /**
-         * ensure the url is syntactically valid and we can open it for reading
+         * mime_content_type throws a type error if it is not supplied a valid resource
          */
         try {
-            $handle = Stream::openForReading($url);
+            $detected = mime_content_type($stream);
         } catch (Throwable $e) {
-            throw new UrlMustBeReadableException($url->render(), $e);
+            throw new MimeTypesUnreadableStreamException($e);
         }
-        $detected = mime_content_type($handle) ?: 'unknown';
-        Stream::close($handle);
 
         /**
-         * mime_content_type can return false if it is unable to detect the mime type.  Less likely, it could
-         * conceivably return a mime type that is unknown in the list of mime types supplied by the cdn that
+         * conceivably could return a mime type that is unknown in the list of mime types supplied by the cdn that
          * this library is using
          */
-        if (!$contentMimeType = $this->getMimeType($detected)) {
-            throw new UnknownMimeTypeDetectedException($detected, $url->render());
+        if ((false === $detected) || !$contentMimeType = $this->getMimeType($detected)) {
+            throw new UnknownMimeTypeDetectedException($detected);
         }
         return $contentMimeType;
     }

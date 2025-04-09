@@ -5,7 +5,7 @@ namespace pvcTests\http;
 use PHPUnit\Framework\TestCase;
 use pvc\http\err\InvalidResourceException;
 use pvc\http\err\InvalidStreamHandleException;
-use pvc\http\err\UrlMustBeReadableException;
+use pvc\http\err\MimeTypesUnreadableStreamException;
 use pvc\http\Stream;
 use pvc\http\url\Url;
 use pvc\interfaces\http\UrlInterface;
@@ -22,7 +22,7 @@ class StreamTest extends TestCase
 
     /**
      * @return void
-     * @throws UrlMustBeReadableException
+     * @throws MimeTypesUnreadableStreamException
      * @covers \pvc\http\Stream::openForReading
      * @runInSeparateProcess
      */
@@ -30,7 +30,7 @@ class StreamTest extends TestCase
     {
         $url = $this->createMock(Url::class);
         uopz_set_return('fopen', false);
-        self::expectException(UrlMustBeReadableException::class);
+        self::expectException(MimeTypesUnreadableStreamException::class);
         $handle = Stream::openForReading($url);
         unset($handle);
         uopz_unset_return('fopen');
@@ -38,7 +38,7 @@ class StreamTest extends TestCase
 
     /**
      * @return void
-     * @throws UrlMustBeReadableException
+     * @throws MimeTypesUnreadableStreamException
      * @covers \pvc\http\Stream::openForReading
      */
     public function testOpenForReadingSuccess(): void
@@ -92,7 +92,7 @@ class StreamTest extends TestCase
     /**
      * @return void
      * @throws InvalidResourceException
-     * @throws UrlMustBeReadableException
+     * @throws MimeTypesUnreadableStreamException
      * @throws \pvc\http\err\InvalidStreamHandleException
      * @covers \pvc\http\Stream::close
      */
