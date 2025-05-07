@@ -8,12 +8,14 @@ declare(strict_types=1);
 
 namespace pvc\http\mime;
 
+use Psr\SimpleCache\CacheInterface;
 use pvc\http\err\MimeTypesUnreadableStreamException;
 use pvc\http\err\UnknownMimeTypeDetectedException;
 use pvc\interfaces\http\mime\MimeTypeInterface;
-use pvc\interfaces\http\mime\MimeTypesCacheInterface;
 use pvc\interfaces\http\mime\MimeTypesInterface;
 use pvc\interfaces\http\mime\MimeTypesSrcInterface;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\Cache\Psr16Cache;
 use Throwable;
 
 /**
@@ -21,21 +23,47 @@ use Throwable;
  */
 class MimeTypes implements MimeTypesInterface
 {
-    /**
-     * @var array <string, MimeTypeInterface>
-     */
-    protected array $mimetypes;
+    protected MimeTypesSrcInterface $mimeTypesSrc;
 
+    protected CacheInterface $cache;
+
+    protected string $cacheKey = 'mimeTypes';
 
     /**
-     * @param MimeTypesSrcInterface|MimeTypesCacheInterface|null $src
+     * @var array<string, MimeTypeInterface>
      */
+    protected array $mimeTypes
+        {
+            get {
+                /** @var array<string, MimeTypeInterface> $mimeTypes */
+                $mimeTypes = $this->cache->get($this->cacheKey);
+                return $mimeTypes;
+            }
+        }
+
     public function __construct(
-        MimeTypesSrcInterface|MimeTypesCacheInterface|null $src = null,
+        ?MimeTypesSrcInterface $src = null,
+        ?CacheInterface $cache = null,
+        ?int $ttl = null,
     )
     {
-        $src = $src ?: new MimeTypesSrcJsDelivr(new MimeTypeFactory());
-        $this->mimetypes = $src->getMimeTypes();
+        $this->mimeTypesSrc = $src ?: new MimeTypesSrcJsDelivr();
+
+        if ($cache === null) {
+            $psr6Cache = new FilesystemAdapter();
+            $this->cache = new Psr16Cache($psr6Cache);
+        } else {
+            $this->cache = $cache;
+        }
+
+        if ($ttl === null) {
+            /**
+             * valid for one day
+             */
+            $ttl = 24 * 60 * 60;
+        }
+        $this->cache->set($this->cacheKey, $this->mimeTypesSrc->getMimeTypes(),
+            $ttl);
     }
 
     /**
@@ -44,7 +72,9 @@ class MimeTypes implements MimeTypesInterface
      */
     public function getMimeType(string $mimeTypeName): ?MimeTypeInterface
     {
-        return $this->mimetypes[$mimeTypeName] ?? null;
+        /** @var MimeTypeInterface|null $result */
+        $result = $this->mimeTypes[$mimeTypeName] ?? null;
+        return $result;
     }
 
     /**
@@ -52,12 +82,9 @@ class MimeTypes implements MimeTypesInterface
      */
     public function getMimeTypeNameFromFileExtension(string $fileExt): ?string
     {
-        foreach ($this->mimetypes as $mimeTypeName => $mimeType) {
-            if (in_array($fileExt, $mimeType->getFileExtensions())) {
-                return $mimeTypeName;
-            }
-        }
-        return null;
+        return array_find_key($this->mimeTypes,
+            fn($mimeType) => in_array($fileExt,
+                $mimeType->getFileExtensions()));
     }
 
     /**
@@ -65,7 +92,7 @@ class MimeTypes implements MimeTypesInterface
      */
     public function getFileExtensionsFromMimeTypeName(string $mimeTypeName): array
     {
-        $mt = $this->mimetypes[$mimeTypeName] ?? null;
+        $mt = $this->mimeTypes[$mimeTypeName] ?? null;
         return $mt ? $mt->getFileExtensions() : [];
     }
 
@@ -74,7 +101,7 @@ class MimeTypes implements MimeTypesInterface
      */
     public function isValidMimeTypeName(string $mimeTypeName): bool
     {
-        return isset($this->mimetypes[$mimeTypeName]);
+        return isset($this->mimeTypes[$mimeTypeName]);
     }
 
     /**
@@ -82,12 +109,8 @@ class MimeTypes implements MimeTypesInterface
      */
     public function isValidMimeTypeFileExtension(string $fileExt): bool
     {
-        foreach ($this->mimetypes as $mimeTypeName => $mimetype) {
-            if (in_array($fileExt, $mimetype->getFileExtensions())) {
-                return true;
-            }
-        }
-        return false;
+        return array_any($this->mimeTypes, fn($mimetype) => in_array($fileExt,
+            $mimetype->getFileExtensions()));
     }
 
     /**
