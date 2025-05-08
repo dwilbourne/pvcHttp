@@ -25,7 +25,7 @@
 		"ext-fileinfo": "*",
 		"ext-mbstring": "*",
 		"psr/simple-cache": "*",
-		"pvc/interfaces": "dev-removedefs",
+		"pvc/interfaces": "*",
 		"pvc/err": "*",
 		"pvc/parser": "*",
 		"pvc/storage": "*",

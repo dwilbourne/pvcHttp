@@ -13,7 +13,6 @@ use pvc\http\err\MimeTypesUnreadableStreamException;
 use pvc\http\err\UnknownMimeTypeDetectedException;
 use pvc\http\mime\MimeTypes;
 use pvc\interfaces\http\mime\MimeTypeInterface;
-use pvc\interfaces\http\mime\MimeTypesCacheInterface;
 use pvc\interfaces\http\mime\MimeTypesSrcInterface;
 use pvc\storage\filesys\File;
 
@@ -35,11 +34,6 @@ class MimeTypesTest extends TestCase
      * @var MimeTypesSrcInterface|MockObject
      */
     protected MimeTypesSrcInterface|MockObject $mimeTypesSrc;
-
-    /**
-     * @var MimeTypesCacheInterface
-     */
-    protected MimeTypesCacheInterface $mimeTypesCache;
 
     public function setUp(): void
     {
@@ -168,6 +162,7 @@ class MimeTypesTest extends TestCase
         /**
          * no idea how to mock a file handle - use a real one
          */
+
         $testFile = $this->fixturesDirectory . '/' . 'jpeg_with_correct_extension.jpg';
         $unknownMimeType = 'bar';
         uopz_set_return('mime_content_type', $unknownMimeType);

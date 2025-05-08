@@ -32,14 +32,7 @@ class MimeTypes implements MimeTypesInterface
     /**
      * @var array<string, MimeTypeInterface>
      */
-    protected array $mimeTypes
-        {
-            get {
-                /** @var array<string, MimeTypeInterface> $mimeTypes */
-                $mimeTypes = $this->cache->get($this->cacheKey);
-                return $mimeTypes;
-            }
-        }
+    protected array $mimeTypes;
 
     public function __construct(
         ?MimeTypesSrcInterface $src = null,
@@ -67,13 +60,25 @@ class MimeTypes implements MimeTypesInterface
     }
 
     /**
+     * @return array<string, MimeTypeInterface>
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function getMimeTypes(): array
+    {
+        /** @var array<string, MimeTypeInterface> $result */
+        $result = $this->cache->get($this->cacheKey);
+        return $result;
+    }
+
+    /**
      * @param string $mimeTypeName
      * @return MimeTypeInterface|null
      */
     public function getMimeType(string $mimeTypeName): ?MimeTypeInterface
     {
         /** @var MimeTypeInterface|null $result */
-        $result = $this->mimeTypes[$mimeTypeName] ?? null;
+        $mimeTypes = $this->getMimeTypes();
+        $result = $mimeTypes[$mimeTypeName] ?? null;
         return $result;
     }
 
@@ -82,9 +87,12 @@ class MimeTypes implements MimeTypesInterface
      */
     public function getMimeTypeNameFromFileExtension(string $fileExt): ?string
     {
-        return array_find_key($this->mimeTypes,
-            fn($mimeType) => in_array($fileExt,
-                $mimeType->getFileExtensions()));
+        foreach ($this->getMimeTypes() as $mimeType) {
+            if (in_array($fileExt, $mimeType->getFileExtensions(), true)) {
+                return $mimeType->getMimeTypeName();
+            }
+        }
+        return null;
     }
 
     /**
@@ -92,7 +100,8 @@ class MimeTypes implements MimeTypesInterface
      */
     public function getFileExtensionsFromMimeTypeName(string $mimeTypeName): array
     {
-        $mt = $this->mimeTypes[$mimeTypeName] ?? null;
+        $mimeTypes = $this->getMimeTypes();
+        $mt = $mimeTypes[$mimeTypeName] ?? null;
         return $mt ? $mt->getFileExtensions() : [];
     }
 
@@ -101,7 +110,8 @@ class MimeTypes implements MimeTypesInterface
      */
     public function isValidMimeTypeName(string $mimeTypeName): bool
     {
-        return isset($this->mimeTypes[$mimeTypeName]);
+        $mimeTypes = $this->getMimeTypes();
+        return isset($mimeTypes[$mimeTypeName]);
     }
 
     /**
@@ -109,8 +119,7 @@ class MimeTypes implements MimeTypesInterface
      */
     public function isValidMimeTypeFileExtension(string $fileExt): bool
     {
-        return array_any($this->mimeTypes, fn($mimetype) => in_array($fileExt,
-            $mimetype->getFileExtensions()));
+        return !is_null($this->getMimeTypeNameFromFileExtension($fileExt));
     }
 
     /**

@@ -38,6 +38,8 @@ class MimeTypesSrcJsDelivr implements MimeTypesSrcInterface
     {
         if ($mimeTypeFactory === null) {
             $this->mimeTypeFactory = new MimeTypeFactory();
+        } else {
+            $this->mimeTypeFactory = $mimeTypeFactory;
         }
     }
 
