@@ -15,12 +15,13 @@ use pvc\http\err\InvalidQuerystringParamNameException;
 use pvc\http\url\QueryString;
 use pvc\interfaces\validator\ValTesterInterface;
 
+#[\PHPUnit\Framework\Attributes\CoversClass(\pvc\http\url\QueryString::class)]
 class QueryStringTest extends TestCase
 {
     /**
      * @var ValTesterInterface<string>|MockObject
      */
-    protected ValTesterInterface|MockObject $tester;
+    protected \PHPUnit\Framework\MockObject\MockObject $tester;
     protected QueryString $qstrObject;
 
     public function setUp(): void
@@ -160,7 +161,6 @@ class QueryStringTest extends TestCase
 
     /**
      * testQueryEncodingDefaultValueIsSet
-     * @covers \pvc\http\url\QueryString
      */
     public function testQueryEncodingDefaultValueIsSet(): void
     {

@@ -93,7 +93,7 @@ class QueryString implements QueryStringInterface
      */
     public function setParam(string $varName, string $value): void
     {
-        if (empty($varName)) {
+        if ($varName === '') {
             throw new InvalidQuerystringException();
         }
         $nameTester = $this->getQuerystringParamNameTester();

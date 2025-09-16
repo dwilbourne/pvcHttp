@@ -38,9 +38,6 @@ class Url implements UrlInterface
      */
     public string $scheme = '';
 
-    /**
-     * @var string
-     */
     public string $host = '';
 
     /**
@@ -48,24 +45,12 @@ class Url implements UrlInterface
      */
     public int|null $port = null;
 
-    /**
-     * @var string
-     */
     public string $user = '';
 
-    /**
-     * @var string
-     */
     public string $password = '';
 
-    /**
-     * @var string
-     */
     public string $path = '';
 
-    /**
-     * @var string
-     */
     public string $fragment = '';
 
     /**
@@ -144,14 +129,14 @@ class Url implements UrlInterface
     public function render(bool $validateBeforeRender = true): string
     {
         $urlString = '';
-        $urlString .= $this->scheme ? $this->scheme . '://' : '';
+        $urlString .= ($this->scheme !== '') ? $this->scheme.'://' : '';
         $urlString .= $this->user;
 
         /**
          * user is separated from password by a colon.  Does it make sense to output a password if there is no user?
          * For now, this outputs a password even if there is no user.
          */
-        $urlString .= $this->password ? ':' . $this->password : '';
+        $urlString .= ($this->password !== '') ? ':'.$this->password : '';
 
         /**
          * separate userid / password from path with a '@'
@@ -163,9 +148,9 @@ class Url implements UrlInterface
         $urlString .= $this->path;
 
         $query = $this->getQueryString()->render();
-        $urlString .= $query ? '?' . $query : '';
+        $urlString .= ($query !== '') ? '?'.$query : '';
 
-        $urlString .= $this->fragment ? '#' . $this->fragment : '';
+        $urlString .= ($this->fragment !== '') ? '#'.$this->fragment : '';
 
         if ($validateBeforeRender && !$this->urlTester->testValue($urlString)) {
             throw new InvalidUrlException($urlString);

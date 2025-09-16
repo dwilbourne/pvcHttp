@@ -17,7 +17,7 @@ use pvc\interfaces\http\UrlInterface;
 
 class ClientTest extends TestCase
 {
-    protected GuzzleClient $guzzleClient;
+    protected \PHPUnit\Framework\MockObject\MockObject $guzzleClient;
     protected Client $client;
 
     public function setUp(): void
@@ -74,7 +74,7 @@ class ClientTest extends TestCase
         $goodUrl = $this->createMock(UrlInterface::class);
         $badVerb = 'FOO';
         self::expectException(InvalidHttpVerbException::class);
-        $response = $this->client->request($badVerb, $goodUrl);
+        $this->client->request($badVerb, $goodUrl);
     }
 
     /**

@@ -5,8 +5,6 @@ namespace pvc\http;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Psr7\Request;
 use Psr\Http\Message\ResponseInterface;
-use pvc\http\err\ClientGeneralException;
-use pvc\http\err\ClientLogicException;
 use pvc\http\err\ClientRuntimeException;
 use pvc\http\err\InvalidConnectionTimeoutException;
 use pvc\http\err\InvalidHttpVerbException;
@@ -17,16 +15,13 @@ class Client
 {
     protected int $connectionTimeoutInSeconds = 3;
 
-    protected GuzzleClient $guzzleClient;
-
     /**
      * @var array<string>
      */
     protected array $httpVerbs = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'CONNECT', 'TRACE'];
 
-    public function __construct(GuzzleClient $guzzleClient)
+    public function __construct(protected GuzzleClient $guzzleClient)
     {
-        $this->guzzleClient = $guzzleClient;
     }
 
     /**

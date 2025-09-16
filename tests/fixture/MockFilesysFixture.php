@@ -8,99 +8,21 @@ declare(strict_types=1);
 
 namespace pvcTests\http\fixture;
 
+use bovigo\vfs\vfsDirectory;
 use bovigo\vfs\vfsStream;
 use bovigo\vfs\vfsStreamContent;
-use bovigo\vfs\vfsStreamDirectory;
 
 /**
  * Class MockFilesysFixture.
  */
 class MockFilesysFixture
 {
-    /**
-     * @var vfsStreamDirectory
-     */
-    protected vfsStreamDirectory $vfsFileSys;
+    protected vfsDirectory $vfsFileSys;
 
-    /**
-     * @var string
-     */
     protected string $vfsRoot;
 
-    protected array $allFilesAndDirectories;
-
-    protected array $allFilesAndDirectoriesBreadthFirst;
-
-    /**
-     * @var string[]
-     */
-    protected array $allFiles;
-
-    /**
-     * @var string[]
-     */
-    protected array $phpFiles;
-
-    /**
-     * @var string[]
-     */
-    protected array $jsFiles;
-
-    /**
-     * @var string[]
-     */
-    protected array $cssCsvFiles;
-
-    protected vfsStreamContent $vfsDirectory;
-    protected vfsStreamContent $vfsEmptyDirectory;
-    protected vfsStreamContent $vfsFile;
-    protected vfsStreamContent $vfsFileAdditional;
-
-    protected string $urlDirectoryWithFiles;
-    protected string $urlDirectoryEmpty;
-    protected string $urlDirectoryNonExistent;
-    protected string $urlFile;
-    protected string $urlFileAdditional;
-    protected string $urlFileNonExistent;
-    protected array $urlFilesContainingTheWordThis;
-
-    protected int $expectedNumberOfDirectoryEntriesWithoutDots;
-
-
-    /**
-     * MockFilesysFixture constructor.
-     */
-    public function __construct()
-    {
-        /** @var array<string|array<string>> $arrSrcFiles */
-        $arrSrcFiles = [
-            'Subdir_1' => [
-                'AbstractFactory' => [
-                    'test.php' => 'some text content',
-                    'other.php' => 'Some more text content',
-                    'Invalid.csv' => 'Something else',
-                    'valid.css' => 'not real css'
-                ],
-                'AnEmptyFolder' => [],
-                'somecode.php' => 'some php content',
-                'somejavascript.js' => 'this is not real javascript - it is just a test'
-            ],
-            'Subdir_2' => [
-                'SmallLibrary' => [
-                    'libFile_1.php' => 'This is another php file of some kind',
-                    'libFile_2.php' => 'This is the second php file in this library.',
-                    'libFile.css' => 'This is the first css file in this library.',
-                    'libFile.js' => 'This is the first javascript file in this library.',
-                    'libFileDoc.txt' => 'This should be some documentation kind of stuff.',
-                    'OtherJSFile.js' => 'more bogus javascript',
-                    'libFile_3.php' => 'libFile_3.php content',
-                    'libFile_4.php' => 'libFile_4.php content'
-                ]
-            ],
-            'fileInRootOfFixture.ini' => 'Maybe this is some kind of a configuration file... or not'
-        ];
-
-        $this->allFilesAndDirectories = [
+    protected array $allFilesAndDirectories
+        = [
             'vfs://root',
             'vfs://root/Subdir_1',
             'vfs://root/Subdir_1/AbstractFactory',
@@ -124,7 +46,8 @@ class MockFilesysFixture
             'vfs://root/fileInRootOfFixture.ini'
         ];
 
-        $this->allFilesAndDirectoriesBreadthFirst = [
+    protected array $allFilesAndDirectoriesBreadthFirst
+        = [
             'vfs://root',
 
             'vfs://root/Subdir_1',
@@ -152,7 +75,11 @@ class MockFilesysFixture
             'vfs://root/Subdir_2/SmallLibrary/libFile_4.php',
         ];
 
-        $this->allFiles = [
+    /**
+     * @var string[]
+     */
+    protected array $allFiles
+        = [
             'vfs://root/Subdir_1/AbstractFactory/test.php',
             'vfs://root/Subdir_1/AbstractFactory/other.php',
             'vfs://root/Subdir_1/AbstractFactory/Invalid.csv',
@@ -170,7 +97,11 @@ class MockFilesysFixture
             'vfs://root/fileInRootOfFixture.ini'
         ];
 
-        $this->phpFiles = [
+    /**
+     * @var string[]
+     */
+    protected array $phpFiles
+        = [
             'vfs://root/Subdir_1/AbstractFactory/test.php',
             'vfs://root/Subdir_1/AbstractFactory/other.php',
             'vfs://root/Subdir_1/somecode.php',
@@ -180,19 +111,39 @@ class MockFilesysFixture
             'vfs://root/Subdir_2/SmallLibrary/libFile_4.php'
         ];
 
-        $this->jsFiles = [
+    /**
+     * @var string[]
+     */
+    protected array $jsFiles
+        = [
             'vfs://root/Subdir_1/somejavascript.js',
             'vfs://root/Subdir_2/SmallLibrary/libFile.js',
             'vfs://root/Subdir_2/SmallLibrary/OtherJSFile.js'
         ];
 
-        $this->cssCsvFiles = [
+    /**
+     * @var string[]
+     */
+    protected array $cssCsvFiles
+        = [
             'vfs://root/Subdir_1/AbstractFactory/Invalid.csv',
             'vfs://root/Subdir_1/AbstractFactory/valid.css',
             'vfs://root/Subdir_2/SmallLibrary/libFile.css'
         ];
 
-        $this->urlFilesContainingTheWordThis = [
+    protected vfsStreamContent $vfsDirectory;
+    protected vfsStreamContent $vfsEmptyDirectory;
+    protected vfsStreamContent $vfsFile;
+    protected vfsStreamContent $vfsFileAdditional;
+
+    protected string $urlDirectoryWithFiles;
+    protected string $urlDirectoryEmpty;
+    protected string $urlDirectoryNonExistent = 'bar';
+    protected string $urlFile;
+    protected string $urlFileAdditional;
+    protected string $urlFileNonExistent = 'foo';
+    protected array $urlFilesContainingTheWordThis
+        = [
             'vfs://root/Subdir_1/somejavascript.js',
             'vfs://root/Subdir_2/SmallLibrary/libFile_1.php',
             'vfs://root/Subdir_2/SmallLibrary/libFile_2.php',
@@ -200,6 +151,42 @@ class MockFilesysFixture
             'vfs://root/Subdir_2/SmallLibrary/libFile.js',
             'vfs://root/Subdir_2/SmallLibrary/libFileDoc.txt',
             'vfs://root/fileInRootOfFixture.ini'
+        ];
+
+    protected int $expectedNumberOfDirectoryEntriesWithoutDots = 4;
+
+
+    /**
+     * MockFilesysFixture constructor.
+     */
+    public function __construct()
+    {
+        /** @var array<string|array<string>> $arrSrcFiles */
+        $arrSrcFiles = [
+            'Subdir_1'                => [
+                'AbstractFactory'   => [
+                    'test.php'    => 'some text content',
+                    'other.php'   => 'Some more text content',
+                    'Invalid.csv' => 'Something else',
+                    'valid.css'   => 'not real css'
+                ],
+                'AnEmptyFolder'     => [],
+                'somecode.php'      => 'some php content',
+                'somejavascript.js' => 'this is not real javascript - it is just a test'
+            ],
+            'Subdir_2'                => [
+                'SmallLibrary' => [
+                    'libFile_1.php'  => 'This is another php file of some kind',
+                    'libFile_2.php'  => 'This is the second php file in this library.',
+                    'libFile.css'    => 'This is the first css file in this library.',
+                    'libFile.js'     => 'This is the first javascript file in this library.',
+                    'libFileDoc.txt' => 'This should be some documentation kind of stuff.',
+                    'OtherJSFile.js' => 'more bogus javascript',
+                    'libFile_3.php'  => 'libFile_3.php content',
+                    'libFile_4.php'  => 'libFile_4.php content'
+                ]
+            ],
+            'fileInRootOfFixture.ini' => 'Maybe this is some kind of a configuration file... or not'
         ];
 
         $filesysRoot = 'root';
@@ -225,13 +212,9 @@ class MockFilesysFixture
 
         $this->urlDirectoryWithFiles = $this->vfsDirectory->url();
         $this->urlDirectoryEmpty = $this->vfsEmptyDirectory->url();
-        $this->urlDirectoryNonExistent = 'bar';
 
         $this->urlFile = $this->vfsFile->url();
         $this->urlFileAdditional = $this->vfsFileAdditional->url();
-        $this->urlFileNonExistent = 'foo';
-
-        $this->expectedNumberOfDirectoryEntriesWithoutDots = 4;
     }
 
     /**
@@ -255,7 +238,7 @@ class MockFilesysFixture
             foreach ($childIterator as $file) {
                 if (($file instanceof vfsStreamDirectory) && !$file->isDot()) {
                     $files = array_merge($files, $this->findVfsFiles($file, $regex));
-                } elseif (preg_match($regex, $file->url())) {
+                } elseif (preg_match($regex, (string)$file->url())) {
                     $files[] = $file->url();
                 }
             }

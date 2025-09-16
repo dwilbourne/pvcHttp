@@ -3,7 +3,13 @@
          colors="true"
          bootstrap="vendor/autoload.php"
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
-         displayDetailsOnAllIssues="true">
+         displayDetailsOnPhpunitDeprecations="true">
+
+    <coverage>
+        <report>
+            <html outputDirectory="coverage"/>
+        </report>
+    </coverage>
 
     <source restrictDeprecations="true"
             restrictNotices="true"

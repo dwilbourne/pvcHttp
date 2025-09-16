@@ -8,10 +8,6 @@ declare(strict_types=1);
 
 namespace pvc\http\mime;
 
-use pvc\err\pvc\file\FileDoesNotExistException;
-use pvc\err\pvc\file\FileNotReadableException;
-use pvc\http\err\ConflictingMimeTypesException;
-use pvc\http\err\InvalidMimeDetectionConstantException;
 use pvc\interfaces\http\mime\MimeTypeInterface;
 
 /**
@@ -19,9 +15,6 @@ use pvc\interfaces\http\mime\MimeTypeInterface;
  */
 class MimeType implements MimeTypeInterface
 {
-    /**
-     * @var string
-     */
     protected string $mimeTypeName;
 
     /**
@@ -62,6 +55,4 @@ class MimeType implements MimeTypeInterface
     {
         $this->fileExtensions = $fileExtensions;
     }
-
-
 }

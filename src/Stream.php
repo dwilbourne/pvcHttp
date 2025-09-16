@@ -30,7 +30,7 @@ class Stream
      * @throws InvalidResourceException
      * @throws InvalidStreamHandleException
      */
-    public static function close($handle)
+    public static function close($handle): void
     {
         if (!is_resource($handle)) {
             throw new InvalidResourceException();

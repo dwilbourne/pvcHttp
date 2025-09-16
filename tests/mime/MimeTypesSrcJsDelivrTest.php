@@ -13,14 +13,11 @@ use pvc\http\mime\MimeTypesSrcJsDelivr;
 use pvc\interfaces\http\mime\MimeTypeFactoryInterface;
 use pvc\interfaces\http\mime\MimeTypeInterface;
 
-class MimeTypesSrcTest extends TestCase
+class MimeTypesSrcJsDelivrTest extends TestCase
 {
-    /**
-     * @var MimeTypesSrcJsDelivr
-     */
     protected MimeTypesSrcJsDelivr $mimeTypesSrc;
 
-    protected MimeTypeFactoryInterface $mimeTypeFactory;
+    protected \PHPUnit\Framework\MockObject\MockObject $mimeTypeFactory;
 
     /**
      * @var array<string>

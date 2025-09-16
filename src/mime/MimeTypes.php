@@ -42,7 +42,7 @@ class MimeTypes implements MimeTypesInterface
     {
         $this->mimeTypesSrc = $src ?: new MimeTypesSrcJsDelivr();
 
-        if ($cache === null) {
+        if (!$cache instanceof \Psr\SimpleCache\CacheInterface) {
             $psr6Cache = new FilesystemAdapter();
             $this->cache = new Psr16Cache($psr6Cache);
         } else {
@@ -76,10 +76,8 @@ class MimeTypes implements MimeTypesInterface
      */
     public function getMimeType(string $mimeTypeName): ?MimeTypeInterface
     {
-        /** @var MimeTypeInterface|null $result */
         $mimeTypes = $this->getMimeTypes();
-        $result = $mimeTypes[$mimeTypeName] ?? null;
-        return $result;
+        return $mimeTypes[$mimeTypeName] ?? null;
     }
 
     /**

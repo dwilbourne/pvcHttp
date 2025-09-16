@@ -9,7 +9,7 @@ use pvc\http\url\ValTesterUrl;
 
 class ValTesterUrlTest extends TestCase
 {
-    protected FilterVarValidateUrl|MockObject $filterVarValidateUrlMock;
+    protected \PHPUnit\Framework\MockObject\MockObject $filterVarValidateUrlMock;
     protected ValTesterUrl $urlTester;
 
     public function setUp(): void

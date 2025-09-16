@@ -24,8 +24,8 @@ class StreamTest extends TestCase
      * @return void
      * @throws MimeTypesUnreadableStreamException
      * @covers \pvc\http\Stream::openForReading
-     * @runInSeparateProcess
      */
+    #[\PHPUnit\Framework\Attributes\RunInSeparateProcess]
     public function testOpenForReadingFails(): void
     {
         $url = $this->createMock(Url::class);
@@ -45,9 +45,7 @@ class StreamTest extends TestCase
     {
         $url = $this->createMock(UrlInterface::class);
         $mockHandle = 'foo';
-        $callback = function (string $url) use ($mockHandle) {
-            return $mockHandle;
-        };
+        $callback = (fn(string $url): string => $mockHandle);
         uopz_set_return('fopen', $callback, true);
         $handle = Stream::openForReading($url);
         self::assertSame($mockHandle, $handle);
@@ -72,8 +70,8 @@ class StreamTest extends TestCase
      * @throws InvalidResourceException
      * @throws InvalidStreamHandleException
      * @covers \pvc\http\Stream::close
-     * @runInSeparateProcess
      */
+    #[\PHPUnit\Framework\Attributes\RunInSeparateProcess]
     public function testClosseFailsIfWrongKindOfResource(): void
     {
         /**

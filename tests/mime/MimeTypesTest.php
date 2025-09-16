@@ -9,6 +9,7 @@ namespace pvcTests\http\mime;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\SimpleCache\CacheInterface;
 use pvc\http\err\MimeTypesUnreadableStreamException;
 use pvc\http\err\UnknownMimeTypeDetectedException;
 use pvc\http\mime\MimeTypes;
@@ -20,9 +21,6 @@ class MimeTypesTest extends TestCase
 {
     protected string $fixturesDirectory = __DIR__ . '/fixtures';
 
-    /**
-     * @var MimeTypes
-     */
     protected MimeTypes $mimeTypes;
 
     /**
@@ -33,7 +31,7 @@ class MimeTypesTest extends TestCase
     /**
      * @var MimeTypesSrcInterface|MockObject
      */
-    protected MimeTypesSrcInterface|MockObject $mimeTypesSrc;
+    protected \PHPUnit\Framework\MockObject\MockObject $mimeTypesSrc;
 
     public function setUp(): void
     {
@@ -64,6 +62,18 @@ class MimeTypesTest extends TestCase
 
     /**
      * @return void
+     * @covers \pvc\http\mime\MimeTypes::__construct
+     */
+    public function testConstructWithCache(): void
+    {
+        $src = $this->createMock(MimeTypesSrcInterface::class);
+        $cache = $this->createMock(CacheInterface::class);
+        $cache->expects(self::once())->method('set');
+        new MimeTypes($src, $cache);
+    }
+
+    /**
+     * @return void
      * @covers \pvc\http\mime\MimeTypes::getMimeType
      */
     public function testGetMimeType(): void
@@ -72,6 +82,24 @@ class MimeTypesTest extends TestCase
         self::assertInstanceOf(MimeTypeInterface::class, $this->mimeTypes->getMimeType($mimeTypeName));
         $mimeTypeName = 'foo/bar';
         self::assertNull($this->mimeTypes->getMimeType($mimeTypeName));
+    }
+
+    /**
+     * @return void
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @covers \pvc\http\mime\MimeTypes::getMimeTypes
+     */
+    public function testGetMimeTypes(): void
+    {
+        $src = $this->createMock(MimeTypesSrcInterface::class);
+        $cache = $this->createMock(CacheInterface::class);
+        $cache->expects(self::once())->method('set');
+        $expectedResult = ['image/jpeg'];
+        $cache->expects(self::once())->method('get')->willReturn(
+            $expectedResult
+        );
+        $mimeTypes = new MimeTypes($src, $cache);
+        self::assertEquals($expectedResult, $mimeTypes->getMimeTypes());
     }
 
     /**
@@ -155,8 +183,8 @@ class MimeTypesTest extends TestCase
     /**
      * @return void
      * @covers \pvc\http\mime\MimeTypes::detect
-     * @runInSeparateProcess
      */
+    #[\PHPUnit\Framework\Attributes\RunInSeparateProcess]
     public function testDetectFailsIfMimeTypeIsUnknown(): void
     {
         /**

@@ -23,14 +23,14 @@ class UrlTest extends TestCase
 
     protected Url $url;
 
-    protected ParserQueryStringInterface $queryStringParser;
+    protected \PHPUnit\Framework\MockObject\MockObject $queryStringParser;
 
-    protected QueryStringInterface|MockObject $queryString;
+    protected \PHPUnit\Framework\MockObject\MockObject $queryString;
 
     /**
      * @var  ValTesterInterface<string>|MockObject
      */
-    protected ValTesterInterface|MockObject $urlTester;
+    protected \PHPUnit\Framework\MockObject\MockObject $urlTester;
 
     /**
      * @var UrlShape
@@ -49,10 +49,7 @@ class UrlTest extends TestCase
         $this->urlTester = $this->createMock(ValTesterInterface::class);
         $this->url = new Url($this->queryStringParser, $this->urlTester);
 
-        /**
-         * @var UrlShape
-         */
-        $this->testArray = array(
+        $this->testArray = [
             'scheme' => 'https',
             'host' => 'ajax.googleapis.com',
             'port' => '443',
@@ -61,7 +58,7 @@ class UrlTest extends TestCase
             'path' => '/ajax/libs/jquery/3.5.1/jquery.min.js',
             'query' => $this->queryString->render(),
             'fragment' => 'anchor'
-        );
+        ];
 
         $this->testUrlString = '';
         $this->testUrlString .= 'https://someuser:somepassword@ajax.googleapis.com:443';

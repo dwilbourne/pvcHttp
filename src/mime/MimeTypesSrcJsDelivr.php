@@ -26,21 +26,10 @@ class MimeTypesSrcJsDelivr implements MimeTypesSrcInterface
      */
     protected const CDN = 'https://cdn.jsdelivr.net/gh/jshttp/mime-db@master/db.json';
 
-    protected MimeTypeFactoryInterface $mimeTypeFactory;
-    /**
-     * @var array<string>
-     */
-    protected array $mimeTypeNames = [];
-
     public function __construct(
-        ?MimeTypeFactoryInterface $mimeTypeFactory = null,
-    )
-    {
-        if ($mimeTypeFactory === null) {
-            $this->mimeTypeFactory = new MimeTypeFactory();
-        } else {
-            $this->mimeTypeFactory = $mimeTypeFactory;
-        }
+        protected MimeTypeFactoryInterface $mimeTypeFactory
+        = new MimeTypeFactory()
+    ) {
     }
 
     /**

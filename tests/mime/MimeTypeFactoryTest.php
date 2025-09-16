@@ -5,9 +5,10 @@
  */
 declare (strict_types=1);
 
-namespace mime;
+namespace pvcTests\http\mime;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversMethod;
 use pvc\http\mime\MimeType;
 use pvc\http\mime\MimeTypeFactory;
 
@@ -24,6 +25,7 @@ class MimeTypeFactoryTest extends TestCase
      * testMakeMimeType
      * @covers \pvc\http\mime\MimeTypeFactory::makeMimeType
      */
+    #[Covers(MimeTypeFactory::class, 'makeMimeType')]
     public function testMakeMimeType(): void
     {
         self::assertInstanceOf(MimeType::class, $this->mimeTypeFactory->makeMimeType());
