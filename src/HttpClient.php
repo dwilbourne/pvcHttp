@@ -11,7 +11,7 @@ use pvc\http\err\InvalidHttpVerbException;
 use pvc\interfaces\http\UrlInterface;
 use Throwable;
 
-class Client
+class HttpClient
 {
     protected int $connectionTimeoutInSeconds = 3;
 

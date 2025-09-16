@@ -9,37 +9,37 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
-use pvc\http\Client;
 use pvc\http\err\ClientRuntimeException;
 use pvc\http\err\InvalidConnectionTimeoutException;
 use pvc\http\err\InvalidHttpVerbException;
+use pvc\http\HttpClient;
 use pvc\interfaces\http\UrlInterface;
 
-class ClientTest extends TestCase
+class HttpClientTest extends TestCase
 {
     protected \PHPUnit\Framework\MockObject\MockObject $guzzleClient;
-    protected Client $client;
+    protected HttpClient $client;
 
     public function setUp(): void
     {
         $this->guzzleClient = $this->createMock(GuzzleClient::class);
-        $this->client = new Client($this->guzzleClient);
+        $this->client = new HttpClient($this->guzzleClient);
     }
 
     /**
      * @return void
-     * @covers \pvc\http\Client::__construct
+     * @covers \pvc\http\HttpClient::__construct
      */
     public function testConstruct(): void
     {
-        self::assertInstanceOf(Client::class, $this->client);
+        self::assertInstanceOf(HttpClient::class, $this->client);
     }
 
     /**
      * @return void
      * @throws InvalidConnectionTimeoutException
-     * @covers \pvc\http\Client::setConnectionTimeout
-     * @covers \pvc\http\Client::getConnectionTimeout
+     * @covers \pvc\http\HttpClient::setConnectionTimeout
+     * @covers \pvc\http\HttpClient::getConnectionTimeout
      */
     public function testSetGetConnectionTimeout(): void
     {
@@ -67,7 +67,7 @@ class ClientTest extends TestCase
     /**
      * @return void
      * @throws \pvc\http\err\ClientRuntimeException
-     * @covers \pvc\http\Client::validateHttpVerb
+     * @covers \pvc\http\HttpClient::validateHttpVerb
      */
     public function testBadHttpVerbThrowsException(): void
     {
@@ -80,8 +80,8 @@ class ClientTest extends TestCase
     /**
      * @return void
      * @throws \pvc\http\err\ClientRuntimeException
-     * @covers \pvc\http\Client::request
-     * @covers \pvc\http\Client::validateHttpVerb
+     * @covers \pvc\http\HttpClient::request
+     * @covers \pvc\http\HttpClient::validateHttpVerb
      */
     public function testClientRequestSucceeds(): void
     {
@@ -96,7 +96,7 @@ class ClientTest extends TestCase
         $mockHandler = new MockHandler([$testResponse]);
         $handlerStack = HandlerStack::create($mockHandler);
         $guzzleClient = new GuzzleClient(['handler' => $handlerStack]);
-        $client = new Client($guzzleClient);
+        $client = new HttpClient($guzzleClient);
 
         $actualResponse = $client->request($httpVerb, $url);
         self::assertSame($testResponse, $actualResponse);
@@ -105,7 +105,7 @@ class ClientTest extends TestCase
     /**
      * @return void
      * @throws ClientRuntimeException
-     * @covers \pvc\http\Client::request
+     * @covers \pvc\http\HttpClient::request
      */
     public function testClientRequestFails(): void
     {
@@ -120,7 +120,7 @@ class ClientTest extends TestCase
         $mockHandler = new MockHandler([$testResponse]);
         $handlerStack = HandlerStack::create($mockHandler);
         $guzzleClient = new GuzzleClient(['handler' => $handlerStack]);
-        $client = new Client($guzzleClient);
+        $client = new HttpClient($guzzleClient);
 
         self::expectException(ClientRuntimeException::class);
         $actualResponse = $client->request($httpVerb, $url);
