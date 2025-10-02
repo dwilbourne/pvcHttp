@@ -16,6 +16,8 @@ use pvc\interfaces\http\mime\MimeTypesSrcInterface;
 
 /**
  * Class MimeTypesSrcJsDelivr
+ *
+ * when we get the json from the cdn and decode it, we will get an array of StdClass objects of the following shape.
  * @phpstan-type MimeTypeShapeJsDelivr object{'source': string, 'extensions': ?array<string>, 'compressible': bool, 'charset': string}
  */
 class MimeTypesSrcJsDelivr implements MimeTypesSrcInterface
@@ -48,6 +50,9 @@ class MimeTypesSrcJsDelivr implements MimeTypesSrcInterface
 
         /**
          * if there was a problem decoding the json, json_decode returns null.
+         * otherwise, it is an array where the key is the mime type name and
+         * the value is a StdClass object, from which we will make MimeType
+         * objects
          */
 
         /** @var null|array<string, MimeTypesSrcJsDelivr> $array */

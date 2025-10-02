@@ -11,6 +11,10 @@
         <include>
             <directory>src*</directory>
         </include>
+        <exclude>
+            <directory>src/psr7*</directory>
+            <directory>src/psr18*</directory>
+        </exclude>
     </source>
 
     <testsuites>

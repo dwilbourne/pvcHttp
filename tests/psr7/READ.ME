@@ -1,0 +1,5 @@
+
+
+Pvc just passes through each of the methods to GuzzleHttp.  The only purpose behind doing so is to centralize
+pvc's implementation of Http client, request and response so that if, for some reason, you want to use something
+other than Guzzle, you can do so easily.  The uri object is similar but uses the League's Uri object under the covers

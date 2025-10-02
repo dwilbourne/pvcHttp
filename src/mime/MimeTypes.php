@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace pvc\http\mime;
 
-use Psr\SimpleCache\CacheInterface;
+use Psr\SimpleCache\CacheInterface as SimpleCacheInterface;
 use pvc\http\err\MimeTypesUnreadableStreamException;
 use pvc\http\err\UnknownMimeTypeDetectedException;
 use pvc\interfaces\http\mime\MimeTypeInterface;
@@ -25,7 +25,7 @@ class MimeTypes implements MimeTypesInterface
 {
     protected MimeTypesSrcInterface $mimeTypesSrc;
 
-    protected CacheInterface $cache;
+    protected SimpleCacheInterface $cache;
 
     protected string $cacheKey = 'mimeTypes';
 
@@ -36,13 +36,13 @@ class MimeTypes implements MimeTypesInterface
 
     public function __construct(
         ?MimeTypesSrcInterface $src = null,
-        ?CacheInterface $cache = null,
+        ?SimpleCacheInterface $cache = null,
         ?int $ttl = null,
     )
     {
         $this->mimeTypesSrc = $src ?: new MimeTypesSrcJsDelivr();
 
-        if (!$cache instanceof \Psr\SimpleCache\CacheInterface) {
+        if (!$cache instanceof SimpleCacheInterface) {
             $psr6Cache = new FilesystemAdapter();
             $this->cache = new Psr16Cache($psr6Cache);
         } else {
