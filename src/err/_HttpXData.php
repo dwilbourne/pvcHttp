@@ -24,6 +24,7 @@ class _HttpXData extends XDataAbstract
             MimeTypesUnreadableStreamException::class => 1007,
             UnknownMimeTypeDetectedException::class => 1009,
             InvalidHttpVerbException::class => 1017,
+            OpenFileException::class => 1008,
         ];
     }
 
@@ -35,6 +36,7 @@ class _HttpXData extends XDataAbstract
             MimeTypesUnreadableStreamException::class => 'Unable to read stream or unable to detect mime type of sdtream.',
             UnknownMimeTypeDetectedException::class => 'Unknown mime type detected from php function mime_content_type in stream.',
             InvalidHttpVerbException::class => 'Invalid HTTP verb ${badHttpVerb} provided.',
+            OpenFileException::class => 'Unable to open file ${fileName} in mode ${mode}.',
         ];
     }
 }
