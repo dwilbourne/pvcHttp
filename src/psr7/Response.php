@@ -9,8 +9,11 @@ use GuzzleHttp\Psr7\Response as GuzzleResponse;
 
 class Response implements ResponseInterface
 {
-    public function __construct(protected GuzzleResponse $response)
+    protected ResponseInterface $response;
+
+    public function __construct(GuzzleResponse $response)
     {
+        $this->response = $response;
     }
 
     public function getProtocolVersion(): string
@@ -20,7 +23,8 @@ class Response implements ResponseInterface
 
     public function withProtocolVersion(string $version): MessageInterface
     {
-        return $this->response->withProtocolVersion($version);
+        $this->response = $this->response->withProtocolVersion($version);
+        return $this;
     }
 
     public function getHeaders(): array
@@ -43,19 +47,22 @@ class Response implements ResponseInterface
         return $this->response->getHeaderLine($name);
     }
 
-    public function withHeader(string $name, $value): MessageInterface
+    public function withHeader(string $name, $value): ResponseInterface
     {
-        return $this->response->withHeader($name, $value);
+        $this->response = $this->response->withHeader($name, $value);
+        return $this;
     }
 
-    public function withAddedHeader(string $name, $value): MessageInterface
+    public function withAddedHeader(string $name, $value): ResponseInterface
     {
-        return $this->response->withAddedHeader($name, $value);
+        $this->response = $this->response->withAddedHeader($name, $value);
+        return $this;
     }
 
-    public function withoutHeader(string $name): MessageInterface
+    public function withoutHeader(string $name): ResponseInterface
     {
-        return $this->response->withoutHeader($name);
+        $this->response = $this->response->withoutHeader($name);
+        return $this;
     }
 
     public function getBody(): StreamInterface
@@ -63,9 +70,10 @@ class Response implements ResponseInterface
         return $this->response->getBody();
     }
 
-    public function withBody(StreamInterface $body): MessageInterface
+    public function withBody(StreamInterface $body): ResponseInterface
     {
-        return $this->response->withBody($body);
+        $this->response = $this->response->withBody($body);
+        return $this;
     }
 
     public function getStatusCode(): int
@@ -77,7 +85,8 @@ class Response implements ResponseInterface
         int $code,
         string $reasonPhrase = ''
     ): ResponseInterface {
-        return $this->response->withStatus($code, $reasonPhrase);
+        $this->response = $this->response->withStatus($code, $reasonPhrase);
+        return $this;
     }
 
     public function getReasonPhrase(): string

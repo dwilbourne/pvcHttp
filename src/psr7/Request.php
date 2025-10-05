@@ -28,7 +28,7 @@ class Request implements RequestInterface
             'TRACE'
         ];
 
-    protected GuzzleRequest $guzzleRequest;
+    protected RequestInterface $guzzleRequest;
 
     public function __construct(string $method, UriInterface $uri)
     {
@@ -49,7 +49,10 @@ class Request implements RequestInterface
 
     public function withProtocolVersion(string $version): MessageInterface
     {
-        return $this->guzzleRequest->withProtocolVersion($version);
+        $this->guzzleRequest = $this->guzzleRequest->withProtocolVersion(
+            $version
+        );
+        return $this;
     }
 
     public function getHeaders(): array
@@ -72,19 +75,25 @@ class Request implements RequestInterface
         return $this->guzzleRequest->getHeaderLine($name);
     }
 
-    public function withHeader(string $name, $value): MessageInterface
+    public function withHeader(string $name, $value): RequestInterface
     {
-        return $this->guzzleRequest->withHeader($name, $value);
+        $this->guzzleRequest = $this->guzzleRequest->withHeader($name, $value);
+        return $this;
     }
 
-    public function withAddedHeader(string $name, $value): MessageInterface
+    public function withAddedHeader(string $name, $value): RequestInterface
     {
-        return $this->guzzleRequest->withAddedHeader($name, $value);
+        $this->guzzleRequest = $this->guzzleRequest->withAddedHeader(
+            $name,
+            $value
+        );
+        return $this;
     }
 
-    public function withoutHeader(string $name): MessageInterface
+    public function withoutHeader(string $name): RequestInterface
     {
-        return $this->guzzleRequest->withoutHeader($name);
+        $this->guzzleRequest = $this->guzzleRequest->withoutHeader($name);
+        return $this;
     }
 
     public function getBody(): StreamInterface
@@ -92,9 +101,10 @@ class Request implements RequestInterface
         return $this->guzzleRequest->getBody();
     }
 
-    public function withBody(StreamInterface $body): MessageInterface
+    public function withBody(StreamInterface $body): RequestInterface
     {
-        return $this->guzzleRequest->withBody($body);
+        $this->guzzleRequest = $this->guzzleRequest->withBody($body);
+        return $this;
     }
 
     public function getRequestTarget(): string
@@ -104,7 +114,10 @@ class Request implements RequestInterface
 
     public function withRequestTarget(string $requestTarget): RequestInterface
     {
-        return $this->guzzleRequest->withRequestTarget($requestTarget);
+        $this->guzzleRequest = $this->guzzleRequest->withRequestTarget(
+            $requestTarget
+        );
+        return $this;
     }
 
     public function getMethod(): string
@@ -114,7 +127,8 @@ class Request implements RequestInterface
 
     public function withMethod(string $method): RequestInterface
     {
-        return $this->guzzleRequest->withMethod($method);
+        $this->guzzleRequest = $this->guzzleRequest->withMethod($method);
+        return $this;
     }
 
     public function getUri(): UriInterface
@@ -126,6 +140,10 @@ class Request implements RequestInterface
         UriInterface $uri,
         bool $preserveHost = false
     ): RequestInterface {
-        return $this->guzzleRequest->withUri($uri, $preserveHost);
+        $this->guzzleRequest = $this->guzzleRequest->withUri(
+            $uri,
+            $preserveHost
+        );
+        return $this;
     }
 }

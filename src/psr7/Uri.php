@@ -7,8 +7,11 @@ use GuzzleHttp\Psr7\Uri as GuzzleUri;
 
 class Uri implements UriInterface
 {
-    public function __construct(protected GuzzleUri $uri)
+    protected UriInterface $uri;
+
+    public function __construct(GuzzleUri $uri)
     {
+        $this->uri = $uri;
     }
 
     public function getScheme(): string
@@ -53,39 +56,46 @@ class Uri implements UriInterface
 
     public function withScheme(string $scheme): UriInterface
     {
-        return $this->uri->withScheme($scheme);
+        $this->uri = $this->uri->withScheme($scheme);
+        return $this;
     }
 
     public function withUserInfo(
         string $user,
         ?string $password = null
     ): UriInterface {
-        return $this->uri->withUserInfo($user, $password);
+        $this->uri = $this->uri->withUserInfo($user, $password);
+        return $this;
     }
 
     public function withHost(string $host): UriInterface
     {
-        return $this->uri->withHost($host);
+        $this->uri = $this->uri->withHost($host);
+        return $this;
     }
 
     public function withPort(?int $port): UriInterface
     {
-        return $this->uri->withPort($port);
+        $this->uri = $this->uri->withPort($port);
+        return $this;
     }
 
     public function withPath(string $path): UriInterface
     {
-        return $this->uri->withPath($path);
+        $this->uri = $this->uri->withPath($path);
+        return $this;
     }
 
     public function withQuery(string $query): UriInterface
     {
-        return $this->uri->withQuery($query);
+        $this->uri = $this->uri->withQuery($query);
+        return $this;
     }
 
     public function withFragment(string $fragment): UriInterface
     {
-        return $this->uri->withFragment($fragment);
+        $this->uri = $this->uri->withFragment($fragment);
+        return $this;
     }
 
     public function __toString(): string
