@@ -5,7 +5,7 @@ namespace pvc\http\err;
 use pvc\err\stock\RuntimeException;
 use Throwable;
 
-class OpenFileException extends RuntimeException
+class StreamFactoryOpenFileException extends RuntimeException
 {
     public function __construct(
         string $fileName,

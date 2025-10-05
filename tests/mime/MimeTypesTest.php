@@ -10,8 +10,8 @@ namespace pvcTests\http\mime;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\CacheInterface;
+use pvc\http\err\MimeTypesUnknownTypeDetectedException;
 use pvc\http\err\MimeTypesUnreadableStreamException;
-use pvc\http\err\UnknownMimeTypeDetectedException;
 use pvc\http\mime\MimeTypes;
 use pvc\interfaces\http\mime\MimeTypeInterface;
 use pvc\interfaces\http\mime\MimeTypesSrcInterface;
@@ -164,7 +164,7 @@ class MimeTypesTest extends TestCase
     /**
      * @return void
      * @throws MimeTypesUnreadableStreamException
-     * @throws \pvc\http\err\UnknownMimeTypeDetectedException
+     * @throws \pvc\http\err\MimeTypesUnknownTypeDetectedException
      * @covers \pvc\http\mime\MimeTypes::detect
      *
      * cannot mock a static method call so we have to use uopz to change the behaviors
@@ -194,7 +194,7 @@ class MimeTypesTest extends TestCase
         $testFile = $this->fixturesDirectory . '/' . 'jpeg_with_correct_extension.jpg';
         $unknownMimeType = 'bar';
         uopz_set_return('mime_content_type', $unknownMimeType);
-        self::expectException(UnknownMimeTypeDetectedException::class);
+        self::expectException(MimeTypesUnknownTypeDetectedException::class);
 
         $handle = File::open($testFile);
         $actualMimeTypeString = $this->mimeTypes->detect($handle)->getMimeTypeName();

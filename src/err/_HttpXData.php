@@ -16,27 +16,30 @@ use pvc\err\XDataAbstract;
 class _HttpXData extends XDataAbstract
 {
 
+    /**
+     * getLocalXCodes
+     *
+     * @return array<class-string, int>
+     */
     public function getLocalXCodes(): array
     {
         return [
-            MimeTypeCdnException::class => 1005,
-            MimeTypesJsonDecodingException::class => 1006,
-            MimeTypesUnreadableStreamException::class => 1007,
-            UnknownMimeTypeDetectedException::class => 1009,
-            InvalidHttpVerbException::class => 1017,
-            OpenFileException::class => 1008,
+            MimeTypeCdnException::class                  => 1005,
+            MimeTypesJsonDecodingException::class        => 1006,
+            MimeTypesUnreadableStreamException::class    => 1007,
+            MimeTypesUnknownTypeDetectedException::class => 1009,
+            StreamFactoryOpenFileException::class        => 1008,
         ];
     }
 
     public function getXMessageTemplates(): array
     {
         return [
-            MimeTypeCdnException::class => 'runtime exception: cdn ${cdn} containing mime types in not currently available.',
-            MimeTypesJsonDecodingException::class => 'Error decoding json string into MimeTypes object.',
-            MimeTypesUnreadableStreamException::class => 'Unable to read stream or unable to detect mime type of sdtream.',
-            UnknownMimeTypeDetectedException::class => 'Unknown mime type detected from php function mime_content_type in stream.',
-            InvalidHttpVerbException::class => 'Invalid HTTP verb ${badHttpVerb} provided.',
-            OpenFileException::class => 'Unable to open file ${fileName} in mode ${mode}.',
+            MimeTypeCdnException::class                  => 'runtime exception: cdn ${cdn} containing mime types in not currently available.',
+            MimeTypesJsonDecodingException::class        => 'Error decoding json string into MimeTypes object.',
+            MimeTypesUnreadableStreamException::class    => 'Unable to read stream or unable to detect mime type of sdtream.',
+            MimeTypesUnknownTypeDetectedException::class => 'Unknown mime type detected from php function mime_content_type in stream.',
+            StreamFactoryOpenFileException::class        => 'Unable to open file ${fileName} in mode ${mode}.',
         ];
     }
 }

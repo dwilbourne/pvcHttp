@@ -5,7 +5,7 @@ namespace pvc\http\psr7;
 use GuzzleHttp\Psr7\Stream as GuzzleStream;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\StreamInterface;
-use pvc\http\err\OpenFileException;
+use pvc\http\err\StreamFactoryOpenFileException;
 
 class StreamFactory implements StreamFactoryInterface
 {
@@ -24,7 +24,7 @@ class StreamFactory implements StreamFactoryInterface
         string $mode = 'r'
     ): StreamInterface {
         if (false === ($fp = @fopen($filename, $mode))) {
-            throw new OpenFileException($filename, $mode);
+            throw new StreamFactoryOpenFileException($filename, $mode);
         }
         return new GuzzleStream($fp);
     }

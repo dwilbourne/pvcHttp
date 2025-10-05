@@ -13,15 +13,15 @@ use pvc\http\err\_HttpXData;
 use pvc\http\err\InvalidHttpVerbException;
 use pvc\http\err\MimeTypeCdnException;
 use pvc\http\err\MimeTypesJsonDecodingException;
+use pvc\http\err\MimeTypesUnknownTypeDetectedException;
 use pvc\http\err\MimeTypesUnreadableStreamException;
-use pvc\http\err\UnknownMimeTypeDetectedException;
 
 /**
  * Class _ValidatorXDataTest
  */
 #[CoversClass(MimeTypeCdnException::class)]
 #[CoversClass(MimeTypesJsonDecodingException::class)]
-#[CoversClass(UnknownMimeTypeDetectedException::class)]
+#[CoversClass(MimeTypesUnknownTypeDetectedException::class)]
 #[CoversClass(InvalidHttpVerbException::class)]
 #[CoversClass(MimeTypesUnreadableStreamException::class)]
 class _HttpXDataTest extends XDataTestMaster

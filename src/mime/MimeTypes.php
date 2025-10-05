@@ -9,8 +9,8 @@ declare(strict_types=1);
 namespace pvc\http\mime;
 
 use Psr\SimpleCache\CacheInterface as SimpleCacheInterface;
+use pvc\http\err\MimeTypesUnknownTypeDetectedException;
 use pvc\http\err\MimeTypesUnreadableStreamException;
-use pvc\http\err\UnknownMimeTypeDetectedException;
 use pvc\interfaces\http\mime\MimeTypeInterface;
 use pvc\interfaces\http\mime\MimeTypesInterface;
 use pvc\interfaces\http\mime\MimeTypesSrcInterface;
@@ -122,9 +122,10 @@ class MimeTypes implements MimeTypesInterface
 
     /**
      * @param resource $stream
+     *
      * @return MimeTypeInterface
      * @throws MimeTypesUnreadableStreamException
-     * @throws UnknownMimeTypeDetectedException
+     * @throws MimeTypesUnknownTypeDetectedException
      */
     public function detect($stream): MimeTypeInterface
     {
@@ -142,7 +143,7 @@ class MimeTypes implements MimeTypesInterface
          * this library is using
          */
         if ((false === $detected) || !$contentMimeType = $this->getMimeType($detected)) {
-            throw new UnknownMimeTypeDetectedException($detected);
+            throw new MimeTypesUnknownTypeDetectedException($detected);
         }
         return $contentMimeType;
     }

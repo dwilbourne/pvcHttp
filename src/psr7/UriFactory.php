@@ -2,8 +2,8 @@
 
 namespace pvc\http\psr7;
 
+use GuzzleHttp\Psr7\Uri as GuzzleUri;
 use Psr\Http\Message\UriFactoryInterface;
-use Psr\Http\Message\UriInterface;
 
 /**
  * standard implementations of Psr-7 compliant Uri objects all seem to suffer
@@ -14,9 +14,8 @@ use Psr\Http\Message\UriInterface;
  */
 class UriFactory implements UriFactoryInterface
 {
-    public function createUri(string $uri = ''): UriInterface
+    public function createUri(string $uri = ''): GuzzleUri
     {
-        $guzzleUri = new \GuzzleHttp\Psr7\Uri($uri);
-        return new Uri($guzzleUri);
+        return new GuzzleUri($uri);
     }
 }
